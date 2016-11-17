@@ -18,7 +18,7 @@ import monix.reactive.OverflowStrategy.Unbounded
 
 object DOM {
 
-  def eventListener(target: EventTarget, eventType: String): Observable[Event] =
+  private def eventListener(target: EventTarget, eventType: String): Observable[Event] =
     Observable.create(Unbounded) { subscriber =>
       val c = SingleAssignmentCancelable()
       // Forced conversion, otherwise canceling will not work!
@@ -38,6 +38,9 @@ object DOM {
     })
   }
 
+  /**
+   * input type = text, search, password, email, tel, url
+   */
   def inputChanged(id: Id): Observable[String] = {
     on(id, "change").collect(event => {
       event.target match {
@@ -46,6 +49,9 @@ object DOM {
     })
   }
 
+  /**
+   * input type = number, range
+   */
   def numericInputChanged(id: Id): Observable[Int] = {
     on(id, "change").collect(event => {
       event.target match {
@@ -57,12 +63,30 @@ object DOM {
     })
   }
 
+  /**
+   * select
+   */
   def selectChanged(id: Id): Observable[String] = {
     on(id, "change").collect(event => {
       event.target match {
         case target: HTMLSelectElement => target.value
       }
     })
+  }
+
+  /**
+   * input type = checkbox, radio
+   */
+  def checkableChanged(id: Id): Observable[Boolean] = {
+    on(id, "click").collect(event => {
+      event.target match {
+        case target: HTMLInputElement => target.checked
+      }
+    })
+  }
+
+  def clicked(id: Id): Observable[Event] = {
+    on(id, "click")
   }
 
 }

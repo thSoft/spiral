@@ -1,6 +1,5 @@
 package hu.thsoft.spiral.examples
 
-import org.scalajs.dom._
 import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data.Stored
@@ -72,17 +71,6 @@ class RgbEditor(data: RgbData, parentId: Id) extends Component[Rgb] {
       greenEditor.reacted,
       blueEditor.reacted
     )
-  }
-
-}
-
-object RgbEditorApp {
-
-  def main() {
-    val container = document.createElement("div")
-    document.body.appendChild(container)
-    val component = new RgbEditor(new RgbData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/rgb")), Id.root)
-    Component.run(component, container)
   }
 
 }

@@ -88,14 +88,3 @@ class CmykEditor(data: CmykData, parentId: Id) extends Component[Cmyk] {
   }
 
 }
-
-object CmykEditorApp {
-
-  def main() {
-    val container = document.createElement("div")
-    document.body.appendChild(container)
-    val component = new CmykEditor(new CmykData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/cmyk")), Id.root)
-    Component.run(component, container)
-  }
-
-}

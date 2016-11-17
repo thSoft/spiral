@@ -1,7 +1,5 @@
 package hu.thsoft.spiral.examples
 
-import scala.scalajs.js.JSApp
-
 import org.scalajs.dom._
 
 import hu.thsoft.firebase.Firebase
@@ -34,9 +32,7 @@ object ColorData {
 
 class ColorEditor(data: ColorData, parentId: Id) extends Component[Stored[Color]] {
 
-  def state = {
-    data.caseChanged
-  }
+  def state = data.caseChanged
 
   val caseId = parentId.child("case")
   val valueId = parentId.child("value")
@@ -109,13 +105,10 @@ class ColorEditor(data: ColorData, parentId: Id) extends Component[Stored[Color]
 
 }
 
-object ColorEditorApp extends JSApp {
+object ColorEditorApp {
 
   def main() {
-    val container = document.createElement("div")
-    document.body.appendChild(container)
-    val component = new ColorEditor(new ColorData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/color")), Id.root)
-    Component.run(component, container)
+    ExampleUtils.runComponent(new ColorEditor(new ColorData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/color")), Id.root))
   }
 
 }

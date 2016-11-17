@@ -21,9 +21,9 @@ import hu.thsoft.spiral.DOM
 
 class NumberEditor(data: NumberData, parentId: Id, min: Double, max: Double) extends Component[Stored[Double]] {
 
-  def inputId = parentId.child("input")
-
   def state = data.changed
+
+  val inputId = parentId.child("input")
 
   def view(state: Stored[Double]) = {
     Observable.pure(
@@ -45,17 +45,6 @@ class NumberEditor(data: NumberData, parentId: Id, min: Double, max: Double) ext
     DOM.numericInputChanged(inputId).map(value => {
       data.set(value)
     })
-  }
-
-}
-
-object SliderApp {
-
-  def main() {
-    val container = document.createElement("div")
-    document.body.appendChild(container)
-    val component = new NumberEditor(new NumberData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/slider")), Id.root, 0, 10)
-    Component.run(component, container)
   }
 
 }

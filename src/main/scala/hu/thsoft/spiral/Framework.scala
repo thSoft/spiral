@@ -28,17 +28,21 @@ object Action {
 
   def nop = () => ()
 
+  def sequential(actions: Seq[Action]): Action = () => {
+    actions.foreach(_.apply)
+  }
+
 }
 
-trait Component[S] {
+trait Component[State] {
 
-  def state: Observable[S]
+  def state: Observable[State]
 
-  def view(state: S): Observable[ReactElement]
+  def view(state: State): Observable[ReactElement]
 
   def viewChanged: Observable[ReactElement] = state.switchMap(view(_))
 
-  def react(state: S): Observable[Action]
+  def react(state: State): Observable[Action]
 
   def reacted: Observable[Action] = state.switchMap(react(_))
 
@@ -48,9 +52,40 @@ object Component {
 
   type Action = Function0[Unit]
 
-  def run[S](component: Component[S], container: Node) {
+  def run(component: Component[_], container: Node) {
     component.viewChanged.foreach(element => ReactDOM.render(element, container))
     component.reacted.foreach(action => action.apply())
   }
+
+}
+
+object ObservableUtils {
+
+  /**
+   * Similar to Observable.merge but accepts a sequence of Observables.
+   */
+  def merge[T](observables: Seq[Observable[T]]): Observable[T] = {
+    Observable.merge(observables:_*)
+  }
+
+  /**
+   * Similar to Observable.combineLatestList but accepts a sequence of Observables and if it is empty, emits an empty sequence.
+   */
+  def combineLatestList[T](observables: Seq[Observable[T]]): Observable[Seq[T]] = {
+    if (observables.isEmpty) {
+      Observable.pure(Seq())
+    } else {
+      Observable.combineLatestList(observables:_*)
+    }
+  }
+
+  /**
+   * Emits an item, then never completes.
+   */
+  def constant[T](item: T): Observable[T] = {
+    Observable.never.startWith(Seq(item))
+  }
+
+  // TODO adapter for Observable so that flatMap has combineLatest semantics
 
 }

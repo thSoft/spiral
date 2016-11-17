@@ -22,7 +22,7 @@ case class Cancellation(cancellation: js.Any) extends Throwable
 
 object Data {
 
-  type Stored[T]= Either[Invalid, T]
+  type Stored[T] = Either[Invalid, T]
 
   def observeRaw(firebase: Firebase, eventType: String = "value"): Observable[FirebaseDataSnapshot] =
     new ConnectableObservable[FirebaseDataSnapshot] {
@@ -58,7 +58,7 @@ object Data {
 
     }.refCount
 
-  def observeAtomic[T](readJson: Js.Value => T)(typeName: String)(firebase: Firebase): Observable[Stored[T]] =
+  private def observeAtomic[T](readJson: Js.Value => T)(typeName: String)(firebase: Firebase): Observable[Stored[T]] =
     observeRaw(firebase).map(snapshot => {
       val snapshotValue = snapshot.`val`
       val json = upickle.json.readJs(snapshotValue)
@@ -73,90 +73,80 @@ object Data {
       }
     })
 
+  def observeNumber(firebase: Firebase): Observable[Stored[Double]] =
+    observeAtomic(readJs[Double])("number")(firebase)
+
   def observeString(firebase: Firebase): Observable[Stored[String]] =
     observeAtomic(readJs[String])("string")(firebase)
-
-  def observeInt(firebase: Firebase): Observable[Stored[Int]] =
-    observeAtomic(readJs[Int])("integer")(firebase)
-
-  def observeDouble(firebase: Firebase): Observable[Stored[Double]] =
-    observeAtomic(readJs[Double])("double")(firebase)
 
   def observeBoolean(firebase: Firebase): Observable[Stored[Boolean]] =
     observeAtomic(readJs[Boolean])("boolean")(firebase)
 
-  def getChildren(snapshot: FirebaseDataSnapshot): List[Firebase] = {
-    val children = ListBuffer[Firebase]()
-    snapshot.forEach((child: FirebaseDataSnapshot) => {
-      children += child.ref()
-      false
-    })
-    children.toList
+  private def setAtomic[T](writeJson: T => Js.Value)(firebase: Firebase, value: T): Action = () => {
+    firebase.set(upickle.json.writeJs(writeJson(value)).asInstanceOf[js.Any])
   }
 
-  def caseNameChild(firebase: Firebase): Firebase = {
-    firebase.child("case")
+  def setNumber(firebase: Firebase, value: Double): Action = {
+    setAtomic(writeJs[Double])(firebase, value)
   }
 
-  def valueChild(firebase: Firebase): Firebase = {
-    firebase.child("value")
+  def setString(firebase: Firebase, value: String): Action = {
+    setAtomic(writeJs[String])(firebase, value)
+  }
+
+  def setBoolean(firebase: Firebase, value: Boolean): Action = {
+    setAtomic(writeJs[Boolean])(firebase, value)
   }
 
 }
 
-abstract class Data(val firebase: Firebase)
+abstract class Data(val firebase: Firebase) {
+
+  def delete: Action = () => {
+    firebase.remove()
+  }
+
+  def isSame(data: Data): Boolean = {
+    data.firebase.toString() == firebase.toString()
+  }
+
+}
 
 abstract class AtomicData[Value](firebase: Firebase) extends Data(firebase) {
 
-  def changed: Observable[Stored[Value]] = {
-    Data.observeAtomic(readJson)(typeName)(firebase)
-  }
+  def changed: Observable[Stored[Value]]
 
-  def readJson: Js.Value => Value
-
-  def typeName: String
-
-  def set(value: Value): Action = () => {
-    firebase.set(upickle.json.writeJs(writeJson(value)).asInstanceOf[js.Any])
-  }
-
-  def writeJson: Value => Js.Value
+  def set(value: Value): Action
 
 }
 
 class NumberData(firebase: Firebase) extends AtomicData[Double](firebase) {
 
-  def readJson = readJs[Double]
+  def changed = Data.observeNumber(firebase)
 
-  def typeName = "number"
-
-  def writeJson = writeJs[Double]
+  def set(value: Double) = Data.setNumber(firebase, value)
 
 }
 
 class StringData(firebase: Firebase) extends AtomicData[String](firebase) {
 
-  def readJson = readJs[String]
+  def changed = Data.observeString(firebase)
 
-  def typeName = "string"
-
-  def writeJson = writeJs[String]
+  def set(value: String) = Data.setString(firebase, value)
 
 }
 
 class BooleanData(firebase: Firebase) extends AtomicData[Boolean](firebase) {
 
-  def readJson = readJs[Boolean]
+  def changed = Data.observeBoolean(firebase)
 
-  def typeName = "boolean"
-
-  def writeJson = writeJs[Boolean]
+  def set(value: Boolean) = Data.setBoolean(firebase, value)
 
 }
 
 abstract class RecordData(firebase: Firebase) extends Data(firebase) {
 
-  def newField[Field <: Data](name: String, makeData: Firebase => Field): Field = {
+  protected def newField[Field <: Data](name: String, makeData: Firebase => Field): Field = {
     makeData(firebase.child(name))
   }
 
@@ -164,16 +154,16 @@ abstract class RecordData(firebase: Firebase) extends Data(firebase) {
 
 abstract class ChoiceData[Choice](firebase: Firebase) extends Data(firebase) {
 
-  def cases: Seq[Case[Choice]]
+  protected def cases: Seq[Case[Choice]]
 
   def caseChanged: Observable[Stored[Choice]] = {
-    val caseNameFirebase = Data.caseNameChild(firebase)
+    val caseNameFirebase = caseNameChild(firebase)
     val caseNameObservable = Data.observeString(caseNameFirebase)
     caseNameObservable.map(storedCaseName => {
       storedCaseName.right.flatMap(
         typeName => {
           cases.find(_.name == typeName).map(foundCase => {
-            val valueFirebase = Data.valueChild(firebase)
+            val valueFirebase = valueChild(firebase)
             foundCase.makeChoice(valueFirebase)
           }).toRight(
             Invalid(caseNameFirebase, Js.Str(typeName), cases.map(_.name).mkString(" or "), new Exception(s"unknown $typeName"))
@@ -184,9 +174,55 @@ abstract class ChoiceData[Choice](firebase: Firebase) extends Data(firebase) {
   }
 
   def setCase(caseName: String) = {
-    new StringData(Data.caseNameChild(firebase)).set(caseName)
+    new StringData(caseNameChild(firebase)).set(caseName)
+  }
+
+  private def caseNameChild(firebase: Firebase): Firebase = {
+    firebase.child("case")
+  }
+
+  private def valueChild(firebase: Firebase): Firebase = {
+    firebase.child("value")
   }
 
 }
 
 case class Case[Choice](name: String, makeChoice: Firebase => Choice)
+
+class ReferenceData[Referred <: Data](firebase: Firebase)(makeData: Firebase => Referred) extends Data(firebase) {
+
+  def referredChanged: Observable[Stored[Referred]] = {
+    Data.observeString(firebase).map(storedUrl => {
+      storedUrl.right.map(url => makeData(new Firebase(url)))
+    })
+  }
+
+  def setReferred(referred: Referred): Action = {
+    Data.setString(firebase, referred.firebase.toString())
+  }
+
+}
+
+class ListData[Element <: Data](firebase: Firebase)(makeData: Firebase => Element) extends Data(firebase) {
+
+  def changed: Observable[List[Element]] = {
+    Data.observeRaw(firebase).map(snapshot => {
+      getChildren(snapshot).map(makeData(_))
+    })
+  }
+
+  private def getChildren(snapshot: FirebaseDataSnapshot): List[Firebase] = {
+    val children = ListBuffer[Firebase]()
+    snapshot.forEach((child: FirebaseDataSnapshot) => {
+      children += child.ref()
+      false
+    })
+    children.toList
+  }
+
+  def add(setNewElement: Element => Action): Action = () => {
+    val child = firebase.push(null)
+    setNewElement(makeData(child)).apply()
+  }
+
+}
