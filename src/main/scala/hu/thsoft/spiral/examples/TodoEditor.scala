@@ -3,14 +3,16 @@ package hu.thsoft.spiral.examples
 import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.BooleanData
 import hu.thsoft.spiral.Component
-import hu.thsoft.spiral.Id
 import hu.thsoft.spiral.ListData
 import hu.thsoft.spiral.ObservableUtils
+import hu.thsoft.spiral.Output
 import hu.thsoft.spiral.RecordData
 import hu.thsoft.spiral.ReferenceData
 import hu.thsoft.spiral.StringData
+import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
+import hu.thsoft.spiral.Id
 
 class TodoData(firebase: Firebase) extends RecordData(firebase) {
 
@@ -22,33 +24,34 @@ class TodoData(firebase: Firebase) extends RecordData(firebase) {
 
 }
 
-class TodoEditor(val data: TodoData, parentId: Id, availableTodos: ListData[TodoData]) extends Component[Unit] {
+class TodoEditor(val data: TodoData, id: Id, availableTodos: ListData[TodoData]) extends Component {
+
+  type State = Unit
 
   def state = ObservableUtils.constant(())
 
-  val nameEditor = new StringEditor(data.name, parentId.child("name"))
-  val completedEditor = new Checkbox(data.completed, parentId.child("completed"))
-  val blockedByEditor = new TodoReferenceEditor(data.blockedBy, parentId.child("blockedBy"), availableTodos, data)
-
-  def view(state: Unit) = {
-    Observable.combineLatestMap3(
-      nameEditor.viewChanged, completedEditor.viewChanged, blockedByEditor.viewChanged
-    )(
-     (nameView, completedView, blockedByView) =>
-        <.span(
-          completedView,
-          nameView,
-          "Blocked by:", blockedByView
-        )
-    )
-  }
-
-  def react(state: Unit) = {
-    Observable.merge(
-      nameEditor.reacted,
-      completedEditor.reacted,
-      blockedByEditor.reacted
-    )
+  def output(state: State) = {
+    val nameEditor = new StringEditor(data.name, id.child("name"))
+    val completedEditor = new BooleanEditor(data.completed, id.child("completed"))
+    val blockedByEditor = new TodoReferenceEditor(data.blockedBy, id.child("blockedBy"), availableTodos, data)
+    val view: Observable[ReactElement] =
+      Observable.combineLatestMap3(
+        nameEditor.viewChanged, completedEditor.viewChanged, blockedByEditor.viewChanged
+      )(
+       (nameView, completedView, blockedByView) =>
+          <.span(
+            completedView,
+            nameView,
+            "Blocked by:", blockedByView
+          )
+      )
+    val reaction =
+      Observable.merge(
+        nameEditor.reacted,
+        completedEditor.reacted,
+        blockedByEditor.reacted
+      )
+    Output(view, reaction)
   }
 
 }

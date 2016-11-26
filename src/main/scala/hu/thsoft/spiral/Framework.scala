@@ -8,43 +8,17 @@ import japgolly.scalajs.react.ReactElement
 import monix.execution.Scheduler.Implicits.global
 import monix.reactive.Observable
 
-case class Id(val segments: Seq[String]) {
+trait Component {
 
-  def child(segment: String): Id = {
-    Id(segments :+ segment)
-  }
-
-  override def toString = segments.mkString("/")
-
-}
-
-object Id {
-
-  def root: Id = Id(Seq())
-
-}
-
-object Action {
-
-  def nop = () => ()
-
-  def sequential(actions: Seq[Action]): Action = () => {
-    actions.foreach(_.apply)
-  }
-
-}
-
-trait Component[State] {
+  type State
 
   def state: Observable[State]
 
-  def view(state: State): Observable[ReactElement]
+  def output(state: State): Output
 
-  def viewChanged: Observable[ReactElement] = state.switchMap(view(_))
+  def viewChanged: Observable[ReactElement] = state.switchMap(output(_).view)
 
-  def react(state: State): Observable[Action]
-
-  def reacted: Observable[Action] = state.switchMap(react(_))
+  def reacted: Observable[Action] = state.switchMap(output(_).reaction)
 
 }
 
@@ -52,9 +26,21 @@ object Component {
 
   type Action = Function0[Unit]
 
-  def run(component: Component[_], container: Node) {
+  def run(component: Component, container: Node) {
     component.viewChanged.foreach(element => ReactDOM.render(element, container))
     component.reacted.foreach(action => action.apply())
+  }
+
+}
+
+case class Output(view: Observable[ReactElement], reaction: Observable[Action])
+
+object Action {
+
+  def nop = () => ()
+
+  def sequential(actions: Seq[Action]): Action = () => {
+    actions.foreach(_.apply)
   }
 
 }
@@ -87,5 +73,21 @@ object ObservableUtils {
   }
 
   // TODO adapter for Observable so that flatMap has combineLatest semantics
+
+}
+
+case class Id(val segments: Seq[String]) {
+
+  def child(segment: String): Id = {
+    Id(segments :+ segment)
+  }
+
+  override def toString = segments.mkString("/")
+
+}
+
+object Id {
+
+  def root: Id = Id(Seq())
 
 }

@@ -106,8 +106,11 @@ abstract class Data(val firebase: Firebase) {
     firebase.remove()
   }
 
-  def isSame(data: Data): Boolean = {
-    data.firebase.toString() == firebase.toString()
+  override def equals(data: Any): Boolean = {
+    data match {
+      case data: Data => data.firebase.toString() == firebase.toString()
+      case _ => false
+    }
   }
 
 }

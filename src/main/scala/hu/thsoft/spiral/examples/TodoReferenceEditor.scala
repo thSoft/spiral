@@ -6,7 +6,6 @@ import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.BooleanData
 import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.Id
 import hu.thsoft.spiral.RecordData
 import hu.thsoft.spiral.ReferenceData
 import hu.thsoft.spiral.StringData
@@ -16,66 +15,51 @@ import hu.thsoft.spiral.ListData
 import hu.thsoft.spiral.DOM
 import hu.thsoft.spiral.ObservableUtils
 import hu.thsoft.spiral.Data
+import japgolly.scalajs.react.ReactElement
+import hu.thsoft.spiral.Output
+import hu.thsoft.spiral.Id
+import hu.thsoft.spiral.ChoiceList
+import hu.thsoft.spiral.Choice
 
 case class TodoReference(
   selected: Stored[TodoData],
   available: List[TodoData]
 )
 
-case class Remote[T](data: Data, value: T)
+case class Remote[D <: Data, T](data: D, value: T)
 
-class TodoReferenceEditor(data: ReferenceData[TodoData], parentId: Id, availableTodos: ListData[TodoData], todoToOmit: TodoData) extends Component[TodoReference] {
+class TodoReferenceEditor(data: ReferenceData[TodoData], id: Id, availableTodos: ListData[TodoData], todoToOmit: TodoData) extends Component {
+
+  type State = TodoReference
 
   def state = {
     Observable.combineLatestMap2(
       data.referredChanged, availableTodos.changed
     )(
-      (selected, available) => TodoReference(selected, available.filter(!_.isSame(todoToOmit)))
+      (selected, available) => TodoReference(selected, available.filter(_ != todoToOmit))
     )
   }
 
-  val selectId = parentId.child("select")
-
-  val noneValue = "none"
-
-  def view(state: TodoReference) = {
-    def makeRemoteName(todoData: TodoData): Observable[Remote[Stored[String]]] = {
+  def output(state: State) = {
+    def makeRemoteName(todoData: TodoData): Observable[Remote[TodoData, Stored[String]]] = {
       todoData.name.changed.map(Remote(todoData, _))
     }
-    def optionAttributes(value: String): TagMod = {
-      Seq(
-        ^.value := value,
-        ^.selected := state.selected.right.toOption.map(_.firebase.toString() == value)
-      )
-    }
-
-    ObservableUtils.combineLatestList(state.available.map(makeRemoteName)).map(remoteNames =>
-      <.select(
-        ^.id := selectId.toString(),
-        <.option(
-          optionAttributes(noneValue),
-          "(none)"
-        ),
-        remoteNames.flatMap(remoteName => {
-          remoteName.value.right.toOption.map(name =>
-            <.option(
-              optionAttributes(remoteName.data.firebase.toString()),
-              name
-            )
-          )
+    val choiceList: Observable[ChoiceList[Option[TodoData]]] =
+      ObservableUtils.combineLatestList(state.available.map(makeRemoteName)).map(remoteNames => {
+        val noneChoice: Choice[Option[TodoData]] = Choice(None, "(none)")
+        val choices = noneChoice +: remoteNames.map(remoteName => {
+          val item: Option[TodoData] = Some(remoteName.data)
+          Choice(item, remoteName.value.right.toOption.getOrElse("(can't determine name)"))
         })
-      )
-    )
-  }
-
-  def react(state: TodoReference) = {
-    DOM.selectChanged(selectId).map(value => {
-      if (value == noneValue) {
-        data.delete
-      } else {
-        data.setReferred(new TodoData(new Firebase(value)))
-      }
-    })
+        val selectedItem = state.selected.right.toOption
+        new ChoiceList(id, choices, selectedItem)()
+      })
+    val view = choiceList.map(_.view)
+    val reaction =
+      choiceList.switchMap(_.changed).map(selectedTodoData => {
+        selectedTodoData.fold(data.delete)(data.setReferred(_))
+      })
+    Output(view, reaction)
   }
 
 }

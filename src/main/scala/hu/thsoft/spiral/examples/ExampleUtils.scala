@@ -24,21 +24,7 @@ object ExampleUtils {
     <.div(^.backgroundColor := s"rgb(${red.toInt}, ${green.toInt}, ${blue.toInt})", "\u00a0")
   }
 
-  def valueAttribute[T](value: T): TagMod = {
-    Seq(
-      ^.value := value.toString(),
-      ^.onChange ==> ((s: CompState.Access[T]) => s.modState(x => x)) // XXX very ugly workaround for https://github.com/facebook/react/issues/1118
-    )
-  }
-
-  def checkedAttribute(value: Boolean): TagMod = {
-    Seq(
-      ^.checked := value,
-      ^.onChange ==> ((s: CompState.Access[Boolean]) => s.modState(x => x)) // XXX very ugly workaround for https://github.com/facebook/react/issues/1118
-    )
-  }
-
-  def runComponent(component: Component[_]) {
+  def runComponent(component: Component) {
     val container = document.createElement("div")
     document.body.appendChild(container)
     Component.run(component, container)

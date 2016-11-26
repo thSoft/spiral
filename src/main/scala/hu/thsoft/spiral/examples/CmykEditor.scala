@@ -5,12 +5,13 @@ import org.scalajs.dom._
 import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.Id
 import hu.thsoft.spiral.NumberData
 import hu.thsoft.spiral.RecordData
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
+import hu.thsoft.spiral.Output
+import hu.thsoft.spiral.Id
 
 class CmykData(firebase: Firebase) extends RecordData(firebase) {
 
@@ -31,7 +32,9 @@ case class Cmyk(
   black: Stored[Double]
 )
 
-class CmykEditor(data: CmykData, parentId: Id) extends Component[Cmyk] {
+class CmykEditor(data: CmykData, id: Id) extends Component {
+
+  type State = Cmyk
 
   def state = {
     Observable.combineLatestMap4(
@@ -41,15 +44,15 @@ class CmykEditor(data: CmykData, parentId: Id) extends Component[Cmyk] {
     )
   }
 
-  val min = 0
-  val max = 100
+  def output(state: State) = {
+    val min = 0
+    val max = 100
 
-  val cyanEditor = new NumberEditor(data.cyan, parentId.child("cyan"), min, max)
-  val magentaEditor = new NumberEditor(data.magenta, parentId.child("magenta"), min, max)
-  val yellowEditor = new NumberEditor(data.yellow, parentId.child("yellow"), min, max)
-  val blackEditor = new NumberEditor(data.black, parentId.child("black"), min, max)
+    val cyanEditor = new NumberEditor(data.cyan, id.child("cyan"), min, max)
+    val magentaEditor = new NumberEditor(data.magenta, id.child("magenta"), min, max)
+    val yellowEditor = new NumberEditor(data.yellow, id.child("yellow"), min, max)
+    val blackEditor = new NumberEditor(data.black, id.child("black"), min, max)
 
-  def view(state: Cmyk) = {
     val color =
       for (
         cyanValue <- state.cyan.right;
@@ -62,29 +65,29 @@ class CmykEditor(data: CmykData, parentId: Id) extends Component[Cmyk] {
         val blueValue = 255 * (1-yellowValue/100) * (1-blackValue/100)
         ExampleUtils.viewColor(redValue, greenValue, blueValue)
       }
-    Observable.combineLatestMap4(
-      cyanEditor.viewChanged, magentaEditor.viewChanged, yellowEditor.viewChanged, blackEditor.viewChanged
-    )(
-      (cyanView, magentaView, yellowView, blackView) =>
-        <.div(
-          <.table(<.tbody(
-            <.tr(<.td("Cyan: "), <.td(cyanView)),
-            <.tr(<.td("Magenta: "), <.td(magentaView)),
-            <.tr(<.td("Yellow: "), <.td(yellowView)),
-            <.tr(<.td("Black: "), <.td(blackView))
-          )),
-          color.right.getOrElse[ReactElement](<.span("Error"))
-        )
-    )
-  }
-
-  def react(state: Cmyk) = {
-    Observable.merge(
-      cyanEditor.reacted,
-      magentaEditor.reacted,
-      yellowEditor.reacted,
-      blackEditor.reacted
-    )
+    val view: Observable[ReactElement] =
+      Observable.combineLatestMap4(
+        cyanEditor.viewChanged, magentaEditor.viewChanged, yellowEditor.viewChanged, blackEditor.viewChanged
+      )(
+        (cyanView, magentaView, yellowView, blackView) =>
+          <.div(
+            <.table(<.tbody(
+              <.tr(<.td("Cyan: "), <.td(cyanView)),
+              <.tr(<.td("Magenta: "), <.td(magentaView)),
+              <.tr(<.td("Yellow: "), <.td(yellowView)),
+              <.tr(<.td("Black: "), <.td(blackView))
+            )),
+            color.right.getOrElse[ReactElement](<.span("Error"))
+          )
+      )
+    val reaction =
+      Observable.merge(
+        cyanEditor.reacted,
+        magentaEditor.reacted,
+        yellowEditor.reacted,
+        blackEditor.reacted
+      )
+    Output(view, reaction)
   }
 
 }

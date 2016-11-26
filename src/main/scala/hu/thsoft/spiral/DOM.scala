@@ -9,6 +9,11 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
 import org.scalajs.dom.raw.HTMLSelectElement
 
+import japgolly.scalajs.react.CompState
+import japgolly.scalajs.react.ReactElement
+import japgolly.scalajs.react.ReactEventAliases
+import japgolly.scalajs.react.vdom.TagMod
+import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.execution.Ack
 import monix.execution.Cancelable
 import monix.execution.Scheduler.Implicits.global
@@ -16,7 +21,133 @@ import monix.execution.cancelables.SingleAssignmentCancelable
 import monix.reactive.Observable
 import monix.reactive.OverflowStrategy.Unbounded
 
-object DOM {
+abstract class Interactive(protected val id: Id)(protected val tagMod: TagMod*) {
+
+  def view: ReactElement = {
+    makeElement((^.id := id.toString()) + tagMod + extraTagMod)
+  }
+
+  def makeElement(tagMod: TagMod): ReactElement
+
+  def extraTagMod: TagMod = EmptyTag
+
+}
+
+class Checkbox(id: Id, state: Boolean)(tagMod: TagMod*) extends Interactive(id)(tagMod) {
+
+  def makeElement(tagMod: TagMod) = <.input.checkbox(tagMod)
+
+  override def extraTagMod = DOM.checkedAttribute(state)
+
+  def changed: Observable[Boolean] = {
+    DOM.on(id, "click").collect(event => {
+      event.target match {
+        case target: HTMLInputElement => target.checked
+      }
+    })
+  }
+
+}
+
+abstract class TextualInput(id: Id, state: String)(tagMod: TagMod*) extends Interactive(id)(tagMod) {
+
+  override def extraTagMod = DOM.valueAttribute(state)
+
+  def changed: Observable[String] = {
+    DOM.on(id, "change").collect(event => {
+      event.target match {
+        case target: HTMLInputElement => target.value
+      }
+    })
+  }
+
+}
+
+class TextInput(id: Id, state: String)(tagMod: TagMod*) extends TextualInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.text(tagMod)
+}
+
+class Textarea(id: Id, state: String)(tagMod: TagMod*) extends TextualInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.textarea(tagMod)
+}
+
+class SearchInput(id: Id, state: String)(tagMod: TagMod*) extends TextualInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.search(tagMod)
+}
+
+class PasswordInput(id: Id, state: String)(tagMod: TagMod*) extends TextualInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.password(tagMod)
+}
+
+class EmailInput(id: Id, state: String)(tagMod: TagMod*) extends TextualInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.email(tagMod)
+}
+
+class TelephoneInput(id: Id, state: String)(tagMod: TagMod*) extends TextualInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.tel(tagMod)
+}
+
+class UrlInput(id: Id, state: String)(tagMod: TagMod*) extends TextualInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.url(tagMod)
+}
+
+abstract class NumericInput(id: Id, state: Double)(tagMod: TagMod*) extends Interactive(id)(tagMod) {
+
+  override def extraTagMod = DOM.valueAttribute(state)
+
+  def changed: Observable[Double] = {
+    DOM.on(id, "change").collect(event => {
+      event.target match {
+        case target: HTMLInputElement => target.valueAsNumber
+      }
+    })
+  }
+
+}
+
+class NumberInput(id: Id, state: Double)(tagMod: TagMod*) extends NumericInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.number(tagMod)
+}
+
+class RangeInput(id: Id, state: Double)(tagMod: TagMod*) extends NumericInput(id, state)(tagMod) {
+  def makeElement(tagMod: TagMod) = <.input.range(tagMod)
+}
+
+class ChoiceList[Item](id: Id, choices: Seq[Choice[Item]], selectedItem: Item)(tagMod: TagMod*) extends Interactive(id)(tagMod) {
+
+  def makeElement(tagMod: TagMod) = <.select(tagMod)
+
+  override def extraTagMod = {
+    val value = DOM.valueAttribute(choices.map(_.item).indexOf(selectedItem))
+    val choiceViews = choices.zipWithIndex.map { case (choice, index) =>
+      <.option((^.value := index) + choice.label)
+    }
+    value + choiceViews
+  }
+
+  def changed: Observable[Item] = {
+    DOM.on(id, "change").collect(event => {
+      event.target match {
+        case target: HTMLSelectElement => choices(target.selectedIndex).item
+      }
+    })
+  }
+
+}
+
+case class Choice[Item](item: Item, label: String)
+
+class Clickable(doMakeElement: TagMod => ReactElement)(id: Id)(tagMod: TagMod*) extends Interactive(id)(tagMod) {
+
+  def makeElement(tagMod: TagMod) = doMakeElement(tagMod)
+
+  def clicked: Observable[Event] = {
+    DOM.on(id, "click")
+  }
+
+}
+
+object DOM extends ReactEventAliases {
 
   private def eventListener(target: EventTarget, eventType: String): Observable[Event] =
     Observable.create(Unbounded) { subscriber =>
@@ -32,61 +163,24 @@ object DOM {
   def on(id: Id, eventType: String): Observable[Event] = {
     eventListener(window, eventType).filter(event => {
       event.target match {
-        case target: HTMLElement => target.id == id.toString
+        case target: HTMLElement => target.id == id.toString()
         case _ => false
       }
     })
   }
 
-  /**
-   * input type = text, search, password, email, tel, url
-   */
-  def inputChanged(id: Id): Observable[String] = {
-    on(id, "change").collect(event => {
-      event.target match {
-        case target: HTMLInputElement => target.value
-      }
-    })
+  def valueAttribute[T](value: T): TagMod = {
+    Seq(
+      ^.value := value.toString(),
+      ^.onChange ==> ((s: CompState.Access[T]) => s.modState(x => x)) // XXX very ugly workaround for https://github.com/facebook/react/issues/1118
+    )
   }
 
-  /**
-   * input type = number, range
-   */
-  def numericInputChanged(id: Id): Observable[Int] = {
-    on(id, "change").collect(event => {
-      event.target match {
-        case target: HTMLInputElement =>
-          target.valueAsNumber match {
-            case number: Int => number
-          }
-      }
-    })
-  }
-
-  /**
-   * select
-   */
-  def selectChanged(id: Id): Observable[String] = {
-    on(id, "change").collect(event => {
-      event.target match {
-        case target: HTMLSelectElement => target.value
-      }
-    })
-  }
-
-  /**
-   * input type = checkbox, radio
-   */
-  def checkableChanged(id: Id): Observable[Boolean] = {
-    on(id, "click").collect(event => {
-      event.target match {
-        case target: HTMLInputElement => target.checked
-      }
-    })
-  }
-
-  def clicked(id: Id): Observable[Event] = {
-    on(id, "click")
+  def checkedAttribute(value: Boolean): TagMod = {
+    Seq(
+      ^.checked := value,
+      ^.onChange ==> ((s: CompState.Access[Boolean]) => s.modState(x => x)) // XXX very ugly workaround for https://github.com/facebook/react/issues/1118
+    )
   }
 
 }

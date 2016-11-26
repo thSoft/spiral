@@ -1,16 +1,21 @@
 package hu.thsoft.spiral.examples
 
+import scala.scalajs.js.JSApp
+
 import org.scalajs.dom._
 
 import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.Case
 import hu.thsoft.spiral.ChoiceData
+import hu.thsoft.spiral.ChoiceList
 import hu.thsoft.spiral.Component
-import hu.thsoft.spiral.DOM
 import hu.thsoft.spiral.Data.Stored
 import hu.thsoft.spiral.Id
+import hu.thsoft.spiral.Output
+import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
+import hu.thsoft.spiral.Choice
 
 sealed trait Color
 case class RgbColor(rgbData: RgbData) extends Color
@@ -30,76 +35,56 @@ object ColorData {
   val caseNameCmyk = "cmyk"
 }
 
-class ColorEditor(data: ColorData, parentId: Id) extends Component[Stored[Color]] {
+class ColorEditor(data: ColorData, id: Id) extends Component {
+
+  type State = Stored[Color]
 
   def state = data.caseChanged
 
-  val caseId = parentId.child("case")
-  val valueId = parentId.child("value")
-
-  def view(state: Stored[Color]) = {
+  def output(state: State) = {
     state.fold(
-      invalid => {
-        Observable.pure(ExampleUtils.viewInvalid(invalid))
-      },
+      invalid =>
+        Output(
+          view = Observable.pure(ExampleUtils.viewInvalid(invalid)),
+          reaction = Observable.empty
+        ),
       color => {
-        val caseName =
+        val valueId = id.child("value")
+        val valueViewChanged =
+          color match {
+            case RgbColor(rgbData) => new RgbEditor(rgbData, valueId).viewChanged
+            case CmykColor(cmykData) => new CmykEditor(cmykData, valueId).viewChanged
+          }
+        val choices = Seq(
+          Choice(ColorData.caseNameRgb, "RGB"),
+          Choice(ColorData.caseNameCmyk, "CMYK")
+        )
+        val selectedCaseName =
           color match {
             case RgbColor(_) => ColorData.caseNameRgb
             case CmykColor(_) => ColorData.caseNameCmyk
           }
-        val valueViewChanged =
+        val cases = new ChoiceList(id.child("case"), choices, selectedCaseName)()
+        val view: Observable[ReactElement] =
+          valueViewChanged.map(valueView => {
+            <.div(
+              cases.view,
+              valueView
+            )
+          })
+        val caseChanged = cases.changed.map(data.setCase(_))
+        val valueEditorReacted =
           color match {
-            case RgbColor(rgbData) => {
-              new RgbEditor(rgbData, valueId).viewChanged
-            }
-            case CmykColor(cmykData) => {
-              new CmykEditor(cmykData, valueId).viewChanged
-            }
+            case RgbColor(rgbData) => new RgbEditor(rgbData, valueId).reacted
+            case CmykColor(cmykData) => new CmykEditor(cmykData, valueId).reacted
           }
-        valueViewChanged.map(valueView => {
-          <.div(
-            <.select(
-              ^.id := caseId.toString(),
-              ExampleUtils.valueAttribute(caseName),
-              <.option(
-                ^.value := ColorData.caseNameRgb,
-                "RGB"
-              ),
-              <.option(
-                ^.value := ColorData.caseNameCmyk,
-                "CMYK"
-              )
-            ),
-            valueView
+        val reaction =
+          Observable.merge(
+            caseChanged,
+            valueEditorReacted
           )
-        })
+        Output(view, reaction)
       }
-    )
-  }
-
-  def react(state: Stored[Color]) = {
-    val caseChanged =
-      DOM.selectChanged(caseId).map(caseName => data.setCase(caseName))
-    val valueEditorReacted =
-      state.fold(
-        invalid => {
-          Observable.empty
-        },
-        color => {
-          color match {
-            case RgbColor(rgbData) => {
-              new RgbEditor(rgbData, valueId).reacted
-            }
-            case CmykColor(cmykData) => {
-              new CmykEditor(cmykData, valueId).reacted
-            }
-          }
-        }
-      )
-    Observable.merge(
-      caseChanged,
-      valueEditorReacted
     )
   }
 
