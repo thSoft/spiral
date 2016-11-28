@@ -6,10 +6,10 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4",
-  "hu.thsoft" %%% "firebase-scalajs" % "2.4.1",
   "io.monix" %%% "monix" % "2.0.1",
+  "hu.thsoft" %%% "firebase-scalajs" % "2.4.1",
   "com.lihaoyi" %%% "upickle" % "0.3.8",
-  "org.scalaz" %%% "scalaz-core" % "7.2.2"
+  "fr.hmil" %%% "roshttp" % "2.0.0-RC1"
 )
 
 jsDependencies ++= Seq(

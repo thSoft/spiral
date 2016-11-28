@@ -50,7 +50,7 @@ class TodoListEditor(data: ListData[TodoData], id: Id) extends Component {
 
 }
 
-object TodoListEditorApp extends JSApp {
+object TodoListEditorApp {
 
   def main() {
     ExampleUtils.runComponent(new TodoListEditor(ExampleUtils.todoListData, Id.root))
