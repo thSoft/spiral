@@ -48,7 +48,7 @@ class CatGifs(data: StringData, id: Id) extends Component {
 
 }
 
-object CatGifsApp extends JSApp {
+object CatGifsApp {
 
   def main() {
     ExampleUtils.runComponent(new CatGifs(new StringData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/catGifUrl")), Id.root))
