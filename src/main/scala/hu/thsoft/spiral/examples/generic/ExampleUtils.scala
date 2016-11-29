@@ -1,13 +1,9 @@
-package hu.thsoft.spiral.examples
+package hu.thsoft.spiral.examples.generic
 
 import org.scalajs.dom._
 
-import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.Component
-
 import hu.thsoft.spiral.Invalid
-import hu.thsoft.spiral.ListData
-import japgolly.scalajs.react.CompState
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 
@@ -29,7 +25,5 @@ object ExampleUtils {
     document.body.appendChild(container)
     Component.run(component, container)
   }
-
-  def todoListData = new ListData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/todoList"))(new TodoData(_))
 
 }

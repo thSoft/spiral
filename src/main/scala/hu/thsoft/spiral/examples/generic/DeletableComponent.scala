@@ -1,14 +1,14 @@
-package hu.thsoft.spiral.examples
+package hu.thsoft.spiral.examples.generic
 
 import hu.thsoft.spiral.Clickable
 import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data
+import hu.thsoft.spiral.Id
 import hu.thsoft.spiral.ObservableUtils
 import hu.thsoft.spiral.Output
+import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
-import japgolly.scalajs.react.ReactElement
-import hu.thsoft.spiral.Id
 
 class DeletableComponent[ComponentData <: Data](data: ComponentData, id: Id)(makeComponent: (ComponentData, Id) => Component) extends Component {
 

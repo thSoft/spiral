@@ -1,4 +1,4 @@
-package hu.thsoft.spiral.examples
+package hu.thsoft.spiral.examples.misc
 
 import scala.scalajs.js.JSApp
 
@@ -14,6 +14,7 @@ import hu.thsoft.spiral.HTTP
 import hu.thsoft.spiral.Id
 import hu.thsoft.spiral.Output
 import hu.thsoft.spiral.StringData
+import hu.thsoft.spiral.examples.generic.ExampleUtils
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable

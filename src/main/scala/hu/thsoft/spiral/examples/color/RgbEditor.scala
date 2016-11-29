@@ -1,15 +1,17 @@
-package hu.thsoft.spiral.examples
+package hu.thsoft.spiral.examples.color
 
 import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data.Stored
+import hu.thsoft.spiral.Id
 import hu.thsoft.spiral.NumberData
 import hu.thsoft.spiral.Output
 import hu.thsoft.spiral.RecordData
+import hu.thsoft.spiral.examples.generic.ExampleUtils
+import hu.thsoft.spiral.examples.generic.NumberEditor
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
-import hu.thsoft.spiral.Id
 
 class RgbData(firebase: Firebase) extends RecordData(firebase) {
 

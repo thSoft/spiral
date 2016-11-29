@@ -1,25 +1,18 @@
-package hu.thsoft.spiral.examples
+package hu.thsoft.spiral.examples.todolist
 
-import scala.scalajs.js.JSApp
+import hu.thsoft.spiral.Choice
+import hu.thsoft.spiral.ChoiceList
 
-import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.BooleanData
 import hu.thsoft.spiral.Component
+import hu.thsoft.spiral.Data
 import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.RecordData
+import hu.thsoft.spiral.Id
+import hu.thsoft.spiral.ListData
+import hu.thsoft.spiral.ObservableUtils
+import hu.thsoft.spiral.Output
 import hu.thsoft.spiral.ReferenceData
-import hu.thsoft.spiral.StringData
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
-import hu.thsoft.spiral.ListData
-import hu.thsoft.spiral.DOM
-import hu.thsoft.spiral.ObservableUtils
-import hu.thsoft.spiral.Data
-import japgolly.scalajs.react.ReactElement
-import hu.thsoft.spiral.Output
-import hu.thsoft.spiral.Id
-import hu.thsoft.spiral.ChoiceList
-import hu.thsoft.spiral.Choice
 
 case class TodoReference(
   selected: Stored[TodoData],
