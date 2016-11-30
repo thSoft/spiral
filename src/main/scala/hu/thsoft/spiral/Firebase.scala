@@ -1,12 +1,6 @@
 package hu.thsoft.spiral
 
-import scala.collection.mutable.ListBuffer
-import scala.scalajs.js
-import upickle.default.readJs
-import upickle.default.writeJs
-
-import hu.thsoft.firebase.Firebase
-import hu.thsoft.firebase.FirebaseDataSnapshot
+import hu.thsoft.firebase.{Firebase, FirebaseDataSnapshot}
 import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral.Data.Stored
 import monix.execution.cancelables.BooleanCancelable
@@ -15,6 +9,10 @@ import monix.reactive.observables.ConnectableObservable
 import monix.reactive.observers.Subscriber
 import monix.reactive.subjects.PublishSubject
 import upickle.Js
+import upickle.default._
+
+import scala.collection.mutable.ListBuffer
+import scala.scalajs.js
 
 case class Invalid(firebase: Firebase, json: Js.Value, expectedTypeName: String, error: Throwable)
 

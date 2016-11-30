@@ -1,16 +1,8 @@
 package hu.thsoft.spiral.examples.color
 
-import org.scalajs.dom._
-
 import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.Case
-import hu.thsoft.spiral.Choice
-import hu.thsoft.spiral.ChoiceData
-import hu.thsoft.spiral.ChoiceList
-import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.Id
-import hu.thsoft.spiral.Output
+import hu.thsoft.spiral._
 import hu.thsoft.spiral.examples.generic.ExampleUtils
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
@@ -67,7 +59,10 @@ class ColorEditor(data: ColorData, id: Id) extends Component {
         val view: Observable[ReactElement] =
           valueViewChanged.map(valueView => {
             <.div(
-              cases.view,
+              <.label(
+                "Color model:",
+                cases.view
+              ),
               valueView
             )
           })
@@ -85,14 +80,6 @@ class ColorEditor(data: ColorData, id: Id) extends Component {
         Output(view, reaction)
       }
     )
-  }
-
-}
-
-object ColorEditorApp {
-
-  def main() {
-    ExampleUtils.runComponent(new ColorEditor(new ColorData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/color")), Id.root))
   }
 
 }

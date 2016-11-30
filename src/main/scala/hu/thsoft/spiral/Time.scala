@@ -1,10 +1,9 @@
 package hu.thsoft.spiral
 
-import scala.scalajs.js.Date
-
 import monix.reactive.Observable
-import monix.eval.Task
+
 import scala.concurrent.duration.FiniteDuration
+import scala.scalajs.js.Date
 
 object Time {
 

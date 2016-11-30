@@ -1,20 +1,8 @@
 package hu.thsoft.spiral.examples.misc
 
-import scala.scalajs.js.JSApp
-
-import org.scalajs.dom._
-
 import fr.hmil.roshttp.HttpRequest
-import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.Action
-import hu.thsoft.spiral.Clickable
-import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.HTTP
-import hu.thsoft.spiral.Id
-import hu.thsoft.spiral.Output
-import hu.thsoft.spiral.StringData
-import hu.thsoft.spiral.examples.generic.ExampleUtils
+import hu.thsoft.spiral._
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
@@ -44,14 +32,6 @@ class CatGifs(data: StringData, id: Id) extends Component {
       }
     })
     Output(view, reaction)
-  }
-
-}
-
-object CatGifsApp {
-
-  def main() {
-    ExampleUtils.runComponent(new CatGifs(new StringData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/catGifUrl")), Id.root))
   }
 
 }

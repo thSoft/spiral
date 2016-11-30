@@ -1,12 +1,10 @@
 package hu.thsoft.spiral
 
-import org.scalajs.dom.raw.Node
-
 import hu.thsoft.spiral.Component.Action
-import japgolly.scalajs.react.ReactDOM
-import japgolly.scalajs.react.ReactElement
+import japgolly.scalajs.react.{ReactDOM, ReactElement}
 import monix.execution.Scheduler.Implicits.global
 import monix.reactive.Observable
+import org.scalajs.dom.raw.Node
 
 trait Component {
 
@@ -24,7 +22,7 @@ trait Component {
 
 object Component {
 
-  type Action = Function0[Unit]
+  type Action = () => Unit
 
   def run(component: Component, container: Node) {
     component.viewChanged.foreach(element => ReactDOM.render(element, container))
@@ -73,21 +71,5 @@ object ObservableUtils {
   }
 
   // TODO adapter for Observable so that flatMap has combineLatest semantics
-
-}
-
-case class Id(val segments: Seq[String]) {
-
-  def child(segment: String): Id = {
-    Id(segments :+ segment)
-  }
-
-  override def toString = segments.mkString("/")
-
-}
-
-object Id {
-
-  def root: Id = Id(Seq())
 
 }

@@ -1,25 +1,33 @@
 package hu.thsoft.spiral
 
-import scala.scalajs._
-
-import org.scalajs.dom._
-import org.scalajs.dom.Event
-import org.scalajs.dom.EventTarget
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.raw.HTMLInputElement
-import org.scalajs.dom.raw.HTMLSelectElement
-
-import japgolly.scalajs.react.CompState
-import japgolly.scalajs.react.ReactElement
-import japgolly.scalajs.react.ReactEventAliases
 import japgolly.scalajs.react.vdom.TagMod
 import japgolly.scalajs.react.vdom.prefix_<^._
-import monix.execution.Ack
-import monix.execution.Cancelable
+import japgolly.scalajs.react.{CompState, ReactElement, ReactEventAliases}
 import monix.execution.Scheduler.Implicits.global
 import monix.execution.cancelables.SingleAssignmentCancelable
+import monix.execution.{Ack, Cancelable}
 import monix.reactive.Observable
 import monix.reactive.OverflowStrategy.Unbounded
+import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement, HTMLSelectElement}
+import org.scalajs.dom.{Event, EventTarget, _}
+
+import scala.scalajs._
+
+case class Id(val segments: Seq[String]) {
+
+  def child(segment: String): Id = {
+    Id(segments :+ segment)
+  }
+
+  override def toString = segments.mkString("/")
+
+}
+
+object Id {
+
+  def root: Id = Id(Seq())
+
+}
 
 abstract class Interactive(protected val id: Id)(protected val tagMod: TagMod*) {
 

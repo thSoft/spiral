@@ -1,31 +1,13 @@
 package hu.thsoft.spiral.examples.misc
 
-import scala.scalajs.js.JSApp
-
-import org.scalajs.dom._
-
-import fr.hmil.roshttp.HttpRequest
-import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.Action
-import hu.thsoft.spiral.Clickable
-import hu.thsoft.spiral.Component
-import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.HTTP
-import hu.thsoft.spiral.Id
-import hu.thsoft.spiral.Output
-import hu.thsoft.spiral.StringData
-import hu.thsoft.spiral.examples.generic.ExampleUtils
+import hu.thsoft.spiral.{Component, Output, Time}
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
-import upickle.Js
-import upickle.json._
-import scala.scalajs.js.Date
-import hu.thsoft.spiral.Time
 import org.scalajs.dom.ext.Color
-import scala.concurrent.duration.FiniteDuration
-import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration._
+import scala.scalajs.js.Date
 
 class Clock extends Component {
 
@@ -63,14 +45,6 @@ class Clock extends Component {
       secondHand
     ))
     Output(view, Observable.empty)
-  }
-
-}
-
-object ClockApp extends JSApp {
-
-  def main() {
-    ExampleUtils.runComponent(new Clock)
   }
 
 }

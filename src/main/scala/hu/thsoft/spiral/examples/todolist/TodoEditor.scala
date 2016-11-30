@@ -1,17 +1,8 @@
 package hu.thsoft.spiral.examples.todolist
 
 import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.BooleanData
-import hu.thsoft.spiral.Component
-import hu.thsoft.spiral.Id
-import hu.thsoft.spiral.ListData
-import hu.thsoft.spiral.ObservableUtils
-import hu.thsoft.spiral.Output
-import hu.thsoft.spiral.RecordData
-import hu.thsoft.spiral.ReferenceData
-import hu.thsoft.spiral.StringData
-import hu.thsoft.spiral.examples.generic.BooleanEditor
-import hu.thsoft.spiral.examples.generic.StringEditor
+import hu.thsoft.spiral._
+import hu.thsoft.spiral.examples.generic.{BooleanEditor, StringEditor}
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable

@@ -1,13 +1,7 @@
 package hu.thsoft.spiral.examples.generic
 
-import org.scalajs.dom._
-
-import hu.thsoft.spiral.Component
 import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.Id
-import hu.thsoft.spiral.NumberData
-import hu.thsoft.spiral.NumberInput
-import hu.thsoft.spiral.Output
+import hu.thsoft.spiral._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
 

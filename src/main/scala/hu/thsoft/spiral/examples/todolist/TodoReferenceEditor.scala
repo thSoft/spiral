@@ -1,17 +1,7 @@
 package hu.thsoft.spiral.examples.todolist
 
-import hu.thsoft.spiral.Choice
-import hu.thsoft.spiral.ChoiceList
-
-import hu.thsoft.spiral.Component
-import hu.thsoft.spiral.Data
 import hu.thsoft.spiral.Data.Stored
-import hu.thsoft.spiral.Id
-import hu.thsoft.spiral.ListData
-import hu.thsoft.spiral.ObservableUtils
-import hu.thsoft.spiral.Output
-import hu.thsoft.spiral.ReferenceData
-import japgolly.scalajs.react.vdom.prefix_<^._
+import hu.thsoft.spiral._
 import monix.reactive.Observable
 
 case class TodoReference(
@@ -39,11 +29,11 @@ class TodoReferenceEditor(data: ReferenceData[TodoData], id: Id, availableTodos:
     }
     val choiceList: Observable[ChoiceList[Option[TodoData]]] =
       ObservableUtils.combineLatestList(state.available.map(makeRemoteName)).map(remoteNames => {
-        val noneChoice: Choice[Option[TodoData]] = Choice(None, "(none)")
-        val choices = noneChoice +: remoteNames.map(remoteName => {
-          val item: Option[TodoData] = Some(remoteName.data)
-          Choice(item, remoteName.value.right.toOption.getOrElse("(can't determine name)"))
+        val none = Choice(Option.empty[TodoData], "(none)")
+        val todoChoices = remoteNames.map(remoteName => {
+          Choice(Option(remoteName.data), remoteName.value.right.toOption.getOrElse("(can't determine name)"))
         })
+        val choices = none +: todoChoices
         val selectedItem = state.selected.right.toOption
         new ChoiceList(id, choices, selectedItem)()
       })

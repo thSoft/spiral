@@ -1,4 +1,4 @@
-A framework for reactive and modular web applications, inspired by the Elm Architecture and Cycle.js.
+A framework for reactive and modular web applications, focusing on simplicity. It is inspired by the [Elm Architecture](https://guide.elm-lang.org/architecture/) and [Cycle.js](https://cycle.js.org/).
 
 ## Contributor Guide
 
@@ -11,7 +11,9 @@ A framework for reactive and modular web applications, inspired by the Elm Archi
 ### Setup IDE
 
 * Install [IntelliJ IDEA](https://www.jetbrains.com/idea/download)
+  * Install the Scala plugin
 * Import Project from the repository
+  * Import project from external model: SBT
 
 ### Develop
 

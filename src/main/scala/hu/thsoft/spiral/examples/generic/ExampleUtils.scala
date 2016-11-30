@@ -1,11 +1,9 @@
 package hu.thsoft.spiral.examples.generic
 
-import org.scalajs.dom._
-
-import hu.thsoft.spiral.Component
-import hu.thsoft.spiral.Invalid
+import hu.thsoft.spiral.{Component, Invalid}
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.scalajs.dom._
 
 object ExampleUtils {
 
