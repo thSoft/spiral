@@ -1,9 +1,8 @@
 package hu.thsoft.spiral.examples
 
 import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.Component.Action
-import hu.thsoft.spiral.Data.Stored
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral.examples.color.{ColorData, ColorEditor}
 import hu.thsoft.spiral.examples.generic.ExampleUtils
 import hu.thsoft.spiral.examples.misc.{CatGifs, Clock}
@@ -16,9 +15,9 @@ import scala.scalajs.js.JSApp
 
 case class Example(name: String, component: Component)
 
-class ExampleSelector(data: StringData, id: Id) extends Component {
+class ExampleSelector(data: localstorage.StringData, id: Id) extends Component {
 
-  type State = Stored[String]
+  type State = localstorage.Data.Stored[String]
 
   def state = data.changed
 
@@ -64,7 +63,7 @@ class ExampleSelector(data: StringData, id: Id) extends Component {
 object ExamplesApp extends JSApp {
 
   def main() {
-    ExampleUtils.runComponent(new ExampleSelector(new StringData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/example")), Id.root))
+    ExampleUtils.runComponent(new ExampleSelector(new localstorage.StringData(Id.fromString("example")), Id.root))
   }
 
 }

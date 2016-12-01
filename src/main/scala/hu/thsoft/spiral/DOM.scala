@@ -19,13 +19,19 @@ case class Id(val segments: Seq[String]) {
     Id(segments :+ segment)
   }
 
-  override def toString = segments.mkString("/")
+  override def toString = {
+    segments.mkString(Id.separator)
+  }
 
 }
 
 object Id {
 
+  val separator = "/"
+
   def root: Id = Id(Seq())
+
+  def fromString(string: String): Id = Id(string.split(separator).toSeq)
 
 }
 
