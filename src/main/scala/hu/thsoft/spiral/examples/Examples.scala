@@ -25,7 +25,7 @@ class ExampleSelector(data: localstorage.StringData, id: Id) extends Component {
     val selectedExampleName = state.right.getOrElse("")
     val exampleId = id.child("example")
     val examples = Seq(
-      Example("Cat GIFs", new CatGifs(new StringData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/catGifUrl")), exampleId)),
+      Example("Cat GIFs", new CatGifs(new localstorage.StringData(Id.fromString("catGifUrl")), exampleId)),
       Example("Clock", new Clock),
       Example("Color", new ColorEditor(new ColorData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/color")), exampleId)),
       Example("Todo List", new TodoListEditor(new ListData(new Firebase("https://thsoft.firebaseio.com/spiral/examples/todoList"))(new TodoData(_)), exampleId))
