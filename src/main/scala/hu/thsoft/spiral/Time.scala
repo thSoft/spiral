@@ -8,7 +8,7 @@ import scala.scalajs.js.Date
 object Time {
 
   def current(period: FiniteDuration): Observable[Date] = {
-    Observable.repeatEval(new Date).sample(period)
+    Observable.repeatEval(new Date).sample(period).startWith(Seq(new Date))
   }
 
 }
