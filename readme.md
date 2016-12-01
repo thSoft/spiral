@@ -1,5 +1,7 @@
 A framework for reactive and modular web applications, focusing on simplicity. It is inspired by the [Elm Architecture](https://guide.elm-lang.org/architecture/) and [Cycle.js](https://cycle.js.org/).
 
+[Live demo](http://spiral-examples.surge.sh)
+
 ## Contributor Guide
 
 ### Setup

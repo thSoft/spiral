@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+cd "${0%/*}/.."
+
+DIST=target/dist
+SCALA=scala-2.11
+mkdir -p $DIST
+cp index.html $DIST
+mkdir -p $DIST/$SCALA
+for file in target/$SCALA/*.js; do cp $file $DIST/$SCALA; done
+surge $DIST spiral-examples.surge.sh
