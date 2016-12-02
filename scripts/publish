@@ -2,9 +2,10 @@
 cd "${0%/*}/.."
 
 DIST=target/dist
-SCALA=scala-2.11
+SCALA=target/scala-2.11
+rm -rf $DIST
 mkdir -p $DIST
 cp index.html $DIST
 mkdir -p $DIST/$SCALA
-for file in target/$SCALA/*.js; do cp $file $DIST/$SCALA; done
+for file in $SCALA/*.js; do cp $file $DIST/$SCALA; done
 surge $DIST spiral-examples.surge.sh
