@@ -29,3 +29,5 @@ EclipseKeys.withSource := true
 persistLauncher in Compile := true
 
 persistLauncher in Test := false
+
+scalacOptions += "-language:postfixOps"
