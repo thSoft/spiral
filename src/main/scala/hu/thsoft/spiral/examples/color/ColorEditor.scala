@@ -1,8 +1,8 @@
 package hu.thsoft.spiral.examples.color
 
-import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.Data.Stored
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data.Data.Stored
+import hu.thsoft.spiral.data.{Case, ChoiceData, DataStore}
 import hu.thsoft.spiral.examples.generic.ExampleUtils
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
@@ -12,11 +12,11 @@ sealed trait Color
 case class RgbColor(rgbData: RgbData) extends Color
 case class CmykColor(cmykData: CmykData) extends Color
 
-class ColorData(firebase: Firebase) extends ChoiceData[Color](firebase) {
+class ColorData(dataStore: DataStore) extends ChoiceData[Color](dataStore) {
 
   def cases = Seq(
-    new Case(ColorData.caseNameRgb, (firebase: Firebase) => RgbColor(new RgbData(firebase))),
-    new Case(ColorData.caseNameCmyk, (firebase: Firebase) => CmykColor(new CmykData(firebase)))
+    new Case(ColorData.caseNameRgb, (dataStore: DataStore) => RgbColor(new RgbData(dataStore))),
+    new Case(ColorData.caseNameCmyk, (dataStore: DataStore) => CmykColor(new CmykData(dataStore)))
   )
 
 }

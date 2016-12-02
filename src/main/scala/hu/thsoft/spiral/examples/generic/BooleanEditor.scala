@@ -1,7 +1,8 @@
 package hu.thsoft.spiral.examples.generic
 
-import hu.thsoft.spiral.Data.Stored
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data.BooleanData
+import hu.thsoft.spiral.data.Data.Stored
 import monix.reactive.Observable
 
 class BooleanEditor(data: BooleanData, id: Id) extends Component {

@@ -1,6 +1,7 @@
 package hu.thsoft.spiral.examples.generic
 
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data.Data
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable

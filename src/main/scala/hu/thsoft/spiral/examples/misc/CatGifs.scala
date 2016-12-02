@@ -2,8 +2,8 @@ package hu.thsoft.spiral.examples.misc
 
 import fr.hmil.roshttp.HttpRequest
 import hu.thsoft.spiral._
-import hu.thsoft.spiral.localstorage.Data.Stored
-import hu.thsoft.spiral.localstorage.StringData
+import hu.thsoft.spiral.data.Data.Stored
+import hu.thsoft.spiral.data.StringData
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable

@@ -1,7 +1,8 @@
 package hu.thsoft.spiral.examples.generic
 
-import hu.thsoft.spiral.Data.Stored
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data.Data.Stored
+import hu.thsoft.spiral.data.StringData
 import monix.reactive.Observable
 
 class StringEditor(data: StringData, id: Id) extends Component {

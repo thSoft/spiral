@@ -1,14 +1,14 @@
 package hu.thsoft.spiral.examples.color
 
-import hu.thsoft.firebase.Firebase
-import hu.thsoft.spiral.Data.Stored
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data.Data.Stored
+import hu.thsoft.spiral.data.{DataStore, NumberData, RecordData}
 import hu.thsoft.spiral.examples.generic.{ExampleUtils, NumberEditor}
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
 
-class CmykData(firebase: Firebase) extends RecordData(firebase) {
+class CmykData(dataStore: DataStore) extends RecordData(dataStore) {
 
   val cyan = newField("cyan", new NumberData(_))
 

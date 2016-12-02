@@ -1,7 +1,8 @@
 package hu.thsoft.spiral.examples.todolist
 
-import hu.thsoft.spiral.Data.Stored
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data.Data.Stored
+import hu.thsoft.spiral.data.{Data, ListData, ReferenceData}
 import monix.reactive.Observable
 
 case class TodoReference(

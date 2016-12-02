@@ -1,13 +1,13 @@
 package hu.thsoft.spiral.examples.todolist
 
-import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data._
 import hu.thsoft.spiral.examples.generic.{BooleanEditor, StringEditor}
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
 
-class TodoData(firebase: Firebase) extends RecordData(firebase) {
+class TodoData(dataStore: DataStore) extends RecordData(dataStore) {
 
   val name = newField("name", new StringData(_))
 

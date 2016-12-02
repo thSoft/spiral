@@ -1,6 +1,7 @@
 package hu.thsoft.spiral.examples.todolist
 
 import hu.thsoft.spiral._
+import hu.thsoft.spiral.data.ListData
 import hu.thsoft.spiral.examples.generic.DeletableComponent
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
@@ -15,7 +16,7 @@ class TodoListEditor(data: ListData[TodoData], id: Id) extends Component {
   def output(state: State) = {
     val editors =
       state.map(todoData => {
-        new DeletableComponent(todoData, id.child(todoData.firebase.toString()))(new TodoEditor(_, _, data))
+        new DeletableComponent(todoData, id.child(todoData.dataStore.url))(new TodoEditor(_, _, data))
       })
     val add = new Clickable(<.button(_))(id.child("add"))("Add")
     val view: Observable[ReactElement] =
