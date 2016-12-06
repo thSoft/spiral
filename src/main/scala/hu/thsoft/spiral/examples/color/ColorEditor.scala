@@ -10,20 +10,17 @@ import monix.reactive.Observable
 
 sealed trait Color
 case class RgbColor(rgbData: RgbData) extends Color
+object RgbColor { val caseName = "rgb" }
 case class CmykColor(cmykData: CmykData) extends Color
+object CmykColor { val caseName = "cmyk" }
 
 class ColorData(dataStore: DataStore) extends ChoiceData[Color](dataStore) {
 
   def cases = Seq(
-    new Case(ColorData.caseNameRgb, (dataStore: DataStore) => RgbColor(new RgbData(dataStore))),
-    new Case(ColorData.caseNameCmyk, (dataStore: DataStore) => CmykColor(new CmykData(dataStore)))
+    new Case(RgbColor.caseName, dataStore => RgbColor(new RgbData(dataStore))),
+    new Case(CmykColor.caseName, dataStore => CmykColor(new CmykData(dataStore)))
   )
 
-}
-
-object ColorData {
-  val caseNameRgb = "rgb"
-  val caseNameCmyk = "cmyk"
 }
 
 class ColorEditor(data: ColorData, id: Id) extends Component {
@@ -41,23 +38,23 @@ class ColorEditor(data: ColorData, id: Id) extends Component {
         ),
       color => {
         val valueId = id.child("value")
-        val valueViewChanged =
+        val valueEditor =
           color match {
-            case RgbColor(rgbData) => new RgbEditor(rgbData, valueId).viewChanged
-            case CmykColor(cmykData) => new CmykEditor(cmykData, valueId).viewChanged
+            case RgbColor(rgbData) => new RgbEditor(rgbData, valueId)
+            case CmykColor(cmykData) => new CmykEditor(cmykData, valueId)
           }
         val choices = Seq(
-          Choice(ColorData.caseNameRgb, "RGB"),
-          Choice(ColorData.caseNameCmyk, "CMYK")
+          Choice(RgbColor.caseName, "RGB"),
+          Choice(CmykColor.caseName, "CMYK")
         )
         val selectedCaseName =
           color match {
-            case RgbColor(_) => ColorData.caseNameRgb
-            case CmykColor(_) => ColorData.caseNameCmyk
+            case RgbColor(_) => RgbColor.caseName
+            case CmykColor(_) => CmykColor.caseName
           }
         val cases = new ChoiceList(id.child("case"), choices, selectedCaseName)()
         val view: Observable[ReactElement] =
-          valueViewChanged.map(valueView => {
+          valueEditor.viewChanged.map(valueView => {
             <.div(
               <.label(
                 "Color model:",
@@ -67,15 +64,10 @@ class ColorEditor(data: ColorData, id: Id) extends Component {
             )
           })
         val caseChanged = cases.changed.map(data.setCase(_))
-        val valueEditorReacted =
-          color match {
-            case RgbColor(rgbData) => new RgbEditor(rgbData, valueId).reacted
-            case CmykColor(cmykData) => new CmykEditor(cmykData, valueId).reacted
-          }
         val reaction =
           Observable.merge(
             caseChanged,
-            valueEditorReacted
+            valueEditor.reacted
           )
         Output(view, reaction)
       }
