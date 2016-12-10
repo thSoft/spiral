@@ -61,7 +61,7 @@ class BooleanData(dataStore: DataStore) extends AtomicData[Boolean](dataStore) {
 
 abstract class RecordData(dataStore: DataStore) extends Data(dataStore) {
 
-  protected def newField[Field <: Data](name: String, makeData: DataStore => Field): Field = {
+  protected def field[Field <: Data](name: String, makeData: DataStore => Field): Field = {
     makeData(dataStore.child(name))
   }
 

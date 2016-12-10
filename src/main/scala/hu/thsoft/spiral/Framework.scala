@@ -70,10 +70,7 @@ object ObservableUtils {
     Observable.never.startWith(Seq(item))
   }
 
-  // TODO adapter for Observable so that flatMap has combineLatest semantics
-
 }
-
 
 case class Id(val segments: Seq[String]) {
 

@@ -10,11 +10,11 @@ import monix.reactive.Observable
 
 class RgbData(dataStore: DataStore) extends RecordData(dataStore) {
 
-  val red = newField("red", new NumberData(_))
+  val red = field("red", new NumberData(_))
 
-  val green = newField("green", new NumberData(_))
+  val green = field("green", new NumberData(_))
 
-  val blue = newField("blue", new NumberData(_))
+  val blue = field("blue", new NumberData(_))
 
 }
 

@@ -10,13 +10,13 @@ import monix.reactive.Observable
 
 class CmykData(dataStore: DataStore) extends RecordData(dataStore) {
 
-  val cyan = newField("cyan", new NumberData(_))
+  val cyan = field("cyan", new NumberData(_))
 
-  val magenta = newField("magenta", new NumberData(_))
+  val magenta = field("magenta", new NumberData(_))
 
-  val yellow = newField("yellow", new NumberData(_))
+  val yellow = field("yellow", new NumberData(_))
 
-  val black = newField("black", new NumberData(_))
+  val black = field("black", new NumberData(_))
 
 }
 

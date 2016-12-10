@@ -9,11 +9,11 @@ import monix.reactive.Observable
 
 class TodoData(dataStore: DataStore) extends RecordData(dataStore) {
 
-  val name = newField("name", new StringData(_))
+  val name = field("name", new StringData(_))
 
-  val completed = newField("completed", new BooleanData(_))
+  val completed = field("completed", new BooleanData(_))
 
-  val blockedBy = newField("blockedBy", new ReferenceData(_)(new TodoData(_)))
+  val blockedBy = field("blockedBy", new ReferenceData(_)(new TodoData(_)))
 
 }
 

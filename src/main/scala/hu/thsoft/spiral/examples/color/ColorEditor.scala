@@ -17,8 +17,8 @@ object CmykColor { val caseName = "cmyk" }
 class ColorData(dataStore: DataStore) extends ChoiceData[Color](dataStore) {
 
   def cases = Seq(
-    new Case(RgbColor.caseName, dataStore => RgbColor(new RgbData(dataStore))),
-    new Case(CmykColor.caseName, dataStore => CmykColor(new CmykData(dataStore)))
+    Case(RgbColor.caseName, dataStore => RgbColor(new RgbData(dataStore))),
+    Case(CmykColor.caseName, dataStore => CmykColor(new CmykData(dataStore)))
   )
 
 }
