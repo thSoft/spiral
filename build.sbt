@@ -2,6 +2,12 @@ enablePlugins(ScalaJSPlugin)
 
 name := "Spiral"
 
+normalizedName := "spiral"
+
+organization := "hu.thsoft"
+
+version := "0.0-SNAPSHOT"
+
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(

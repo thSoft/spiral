@@ -2,3 +2,4 @@
 cd "${0%/*}/.."
 
 sbt fastOptJS
+sbt publish-local
