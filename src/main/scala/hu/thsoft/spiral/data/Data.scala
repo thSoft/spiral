@@ -8,7 +8,7 @@ import upickle.Js
 /**
   * Represents a type-safe handle to an object stored in a storage.
   */
-abstract class Data(val dataStore: DataStore) {
+sealed abstract class Data(val dataStore: DataStore) {
 
   def delete: Action = dataStore.delete
 
@@ -35,7 +35,7 @@ abstract class AtomicData[Value](dataStore: DataStore) extends Data(dataStore) {
 
 }
 
-class NumberData(dataStore: DataStore) extends AtomicData[Double](dataStore) {
+class NumberData(dataStore: DataStore)(val min: Double, val max: Double) extends AtomicData[Double](dataStore) {
 
   def changed = dataStore.observeNumber
 
@@ -59,29 +59,34 @@ class BooleanData(dataStore: DataStore) extends AtomicData[Boolean](dataStore) {
 
 }
 
-abstract class RecordData(dataStore: DataStore) extends Data(dataStore) {
+abstract class RecordData(dataStore: DataStore, val recordName: String) extends Data(dataStore) {
 
-  protected def field[Field <: Data](name: String, makeData: DataStore => Field): Field = {
-    makeData(dataStore.child(name))
+  protected def field[FieldData <: Data](name: String, makeData: DataStore => FieldData): Field[FieldData] = {
+    Field(name, makeData(dataStore.child(name)))
   }
+
+  def fields: Seq[Field[_ <: Data]]
 
 }
 
-abstract class ChoiceData[Choice](dataStore: DataStore) extends Data(dataStore) {
+case class Field[FieldData <: Data](name: String, data: FieldData)
 
-  protected def cases: Seq[Case[Choice]]
+case class CurrentCase[Choice <: Data](name: String, choice: Choice)
 
-  def caseChanged: Observable[Stored[Choice]] = {
+abstract class ChoiceData[Choice <: Data](dataStore: DataStore) extends Data(dataStore) {
+
+  def cases: Seq[Case[Choice]]
+
+  def caseChanged: Observable[Stored[CurrentCase[Choice]]] = {
     val caseNameDataStore = caseNameChild(dataStore)
     val caseNameObservable = caseNameDataStore.observeString
     caseNameObservable.map(storedCaseName => {
       storedCaseName.right.flatMap(
-        typeName => {
-          cases.find(_.name == typeName).map(foundCase => {
-            val valueDataStore = valueChild(dataStore)
-            foundCase.makeChoice(valueDataStore)
+        caseName => {
+          cases.find(_.name == caseName).map(foundCase => {
+            CurrentCase(caseName, getValueData(foundCase))
           }).toRight(
-            Invalid(caseNameDataStore, Js.Str(typeName), cases.map(_.name).mkString(" or "), new Exception(s"unknown $typeName"))
+            Invalid(caseNameDataStore, Js.Str(caseName), cases.map(_.name).mkString(" or "), new Exception(s"unknown $caseName"))
           )
         }
       )
@@ -100,11 +105,18 @@ abstract class ChoiceData[Choice](dataStore: DataStore) extends Data(dataStore) 
     dataStore.child("value")
   }
 
+  def getValueData(selectedCase: Case[Choice]): Choice = {
+    selectedCase.makeChoice(valueChild(dataStore))
+  }
 }
 
-case class Case[Choice](name: String, makeChoice: DataStore => Choice)
+case class Case[Choice <: Data](name: String, makeChoice: DataStore => Choice)
 
-class ReferenceData[Referred <: Data](dataStore: DataStore)(makeData: DataStore => Referred) extends Data(dataStore) {
+abstract class ReferenceData[Referred <: Data](dataStore: DataStore)(makeData: DataStore => Referred) extends Data(dataStore) {
+
+  def scope: Observable[List[Referred]]
+
+  def getDisplayedName(referred: Referred): Observable[Stored[String]]
 
   def referredChanged: Observable[Stored[Referred]] = {
     dataStore.observeString.map(storedUrl => {

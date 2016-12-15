@@ -4,11 +4,11 @@ import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data.Data.Stored
-import hu.thsoft.spiral.data.{FirebaseDataStore, ListData, LocalDataStore, StringData}
-import hu.thsoft.spiral.examples.color.{ColorData, ColorEditor}
-import hu.thsoft.spiral.examples.generic.ExampleUtils
+import hu.thsoft.spiral.data.{FirebaseDataStore, LocalDataStore, StringData}
+import hu.thsoft.spiral.examples.color.{Color, ColorData}
+import hu.thsoft.spiral.examples.generic.{ExampleUtils, GenericEditor}
 import hu.thsoft.spiral.examples.misc.{CatGifs, Clock}
-import hu.thsoft.spiral.examples.todolist.{TodoData, TodoListEditor}
+import hu.thsoft.spiral.examples.todolist.TodoList
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
@@ -29,8 +29,8 @@ class ExampleSelector(data: StringData, id: Id) extends Component {
     val examples = Seq(
       Example("Cat GIFs", new CatGifs(new StringData(new LocalDataStore(Id.fromString("catGifUrl"))), exampleId)),
       Example("Clock", new Clock),
-      Example("Color", new ColorEditor(new ColorData(new FirebaseDataStore(new Firebase("https://thsoft.firebaseio.com/spiral/examples/color"))), exampleId)),
-      Example("Todo List", new TodoListEditor(new ListData(new FirebaseDataStore(new Firebase("https://thsoft.firebaseio.com/spiral/examples/todoList")))(new TodoData(_)), exampleId))
+      Example("Color", GenericEditor(Color.data, exampleId)),
+      Example("Todo List", GenericEditor(TodoList.data, exampleId))
     )
     val none = new Choice(Option.empty[Example], "(none)")
     val exampleChoices = examples.map(example => new Choice(Option(example), example.name))

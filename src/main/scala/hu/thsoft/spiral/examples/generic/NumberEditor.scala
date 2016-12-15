@@ -6,7 +6,7 @@ import hu.thsoft.spiral.data.NumberData
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable
 
-class NumberEditor(data: NumberData, id: Id, min: Double, max: Double) extends Component {
+class NumberEditor(data: NumberData, id: Id) extends Component {
 
   type State = Stored[Double]
 
@@ -20,7 +20,7 @@ class NumberEditor(data: NumberData, id: Id, min: Double, max: Double) extends C
           reaction = Observable.empty
         ),
       value => {
-        val input = new NumberInput(id, value)(^.min := min, ^.max := max)
+        val input = new NumberInput(id, value)(^.min := data.min, ^.max := data.max)
         Output(
           view = Observable.pure(input.view),
           reaction = input.changed.map(data.set(_))
