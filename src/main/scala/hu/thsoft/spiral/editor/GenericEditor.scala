@@ -1,7 +1,9 @@
-package hu.thsoft.spiral.examples.generic
+package hu.thsoft.spiral.editor
 
-import hu.thsoft.spiral.{Component, Id}
 import hu.thsoft.spiral.data._
+import hu.thsoft.spiral.{Component, Id}
+import japgolly.scalajs.react.ReactElement
+import japgolly.scalajs.react.vdom.prefix_<^._
 
 object GenericEditor {
 
@@ -15,6 +17,13 @@ object GenericEditor {
       case data: RecordData => new RecordEditor(data, id)
       case data: ChoiceData[_] => new ChoiceEditor(data, id)
     }
+  }
+
+  def viewInvalid(invalid: Invalid): ReactElement = {
+    <.a(
+      ^.href := invalid.dataStore.url,
+      s"Error, expected ${invalid.expectedTypeName}"
+    )
   }
 
 }

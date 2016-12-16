@@ -1,4 +1,4 @@
-package hu.thsoft.spiral.examples.misc
+package hu.thsoft.spiral.examples
 
 import hu.thsoft.spiral.{Component, Output, Time}
 import japgolly.scalajs.react.ReactElement

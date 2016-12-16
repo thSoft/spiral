@@ -1,4 +1,4 @@
-package hu.thsoft.spiral.examples.misc
+package hu.thsoft.spiral.examples
 
 import fr.hmil.roshttp.HttpRequest
 import hu.thsoft.spiral._

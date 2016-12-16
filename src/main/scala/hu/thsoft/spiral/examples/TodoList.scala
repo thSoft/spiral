@@ -1,4 +1,4 @@
-package hu.thsoft.spiral.examples.todolist
+package hu.thsoft.spiral.examples
 
 import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.data._

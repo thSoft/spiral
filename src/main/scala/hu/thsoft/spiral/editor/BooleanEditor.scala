@@ -1,4 +1,4 @@
-package hu.thsoft.spiral.examples.generic
+package hu.thsoft.spiral.editor
 
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data.BooleanData
@@ -15,7 +15,7 @@ class BooleanEditor(data: BooleanData, id: Id) extends Component {
     state.fold(
       invalid =>
         Output(
-          view = Observable.pure(ExampleUtils.viewInvalid(invalid)),
+          view = Observable.pure(GenericEditor.viewInvalid(invalid)),
           reaction = Observable.empty
         ),
       value => {

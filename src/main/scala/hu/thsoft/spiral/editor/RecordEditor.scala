@@ -1,10 +1,9 @@
-package hu.thsoft.spiral.examples.generic
+package hu.thsoft.spiral.editor
 
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data.RecordData
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
-import monix.reactive.Observable
 
 case class RecordEditorField(name: String, component: Component)
 

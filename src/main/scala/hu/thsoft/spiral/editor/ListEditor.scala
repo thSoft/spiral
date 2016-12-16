@@ -1,8 +1,9 @@
-package hu.thsoft.spiral.examples.generic
+package hu.thsoft.spiral.editor
 
 import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data._
+import hu.thsoft.spiral.editor.GenericEditor
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.reactive.Observable

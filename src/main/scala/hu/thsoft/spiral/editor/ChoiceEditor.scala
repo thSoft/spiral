@@ -1,4 +1,4 @@
-package hu.thsoft.spiral.examples.generic
+package hu.thsoft.spiral.editor
 
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data.Data.Stored
@@ -17,7 +17,7 @@ class ChoiceEditor[Choice <: Data](data: ChoiceData[Choice], id: Id) extends Com
     state.fold(
       invalid =>
         Output(
-          view = Observable.pure(ExampleUtils.viewInvalid(invalid)),
+          view = Observable.pure(GenericEditor.viewInvalid(invalid)),
           reaction = Observable.empty
         ),
       selectedCase => {

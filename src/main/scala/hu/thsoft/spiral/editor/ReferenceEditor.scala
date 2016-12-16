@@ -1,8 +1,8 @@
-package hu.thsoft.spiral.examples.generic
+package hu.thsoft.spiral.editor
 
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data.Data.Stored
-import hu.thsoft.spiral.data.{Data, ListData, ReferenceData}
+import hu.thsoft.spiral.data.{Data, ReferenceData}
 import monix.reactive.Observable
 
 case class ReferenceState[Referred <: Data](selected: Stored[Referred], available: List[Referred])
