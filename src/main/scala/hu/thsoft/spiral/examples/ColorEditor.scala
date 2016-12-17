@@ -50,8 +50,8 @@ class CmykData(dataStore: DataStore) extends ColorCase(dataStore) {
 class ColorData(dataStore: DataStore) extends ChoiceData[ColorCase](dataStore) {
 
   def cases = Seq(
-    Case[ColorCase]("RGB", new RgbData(_)),
-    Case[ColorCase]("CMYK", new CmykData(_))
+    Case("RGB", new RgbData(_)),
+    Case("CMYK", new CmykData(_))
   )
 
 }

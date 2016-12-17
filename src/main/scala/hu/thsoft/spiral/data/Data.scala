@@ -2,6 +2,7 @@ package hu.thsoft.spiral.data
 
 import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral.data.Data.Stored
+import monix.eval.Task
 import monix.reactive.Observable
 import upickle.Js
 
@@ -27,6 +28,9 @@ object Data {
 
 }
 
+/**
+  * A simple value.
+  */
 abstract class AtomicData[Value](dataStore: DataStore) extends Data(dataStore) {
 
   def changed: Observable[Stored[Value]]
@@ -35,7 +39,7 @@ abstract class AtomicData[Value](dataStore: DataStore) extends Data(dataStore) {
 
 }
 
-class NumberData(dataStore: DataStore)(val min: Double, val max: Double) extends AtomicData[Double](dataStore) {
+class NumberData(dataStore: DataStore)(val min: Double = Double.NegativeInfinity, val max: Double = Double.PositiveInfinity) extends AtomicData[Double](dataStore) {
 
   def changed = dataStore.observeNumber
 
@@ -59,6 +63,10 @@ class BooleanData(dataStore: DataStore) extends AtomicData[Boolean](dataStore) {
 
 }
 
+/**
+  * A record (alias sum type).
+  * By default, the fields represent containment references. To achieve cross-references, use ReferenceData.
+  */
 abstract class RecordData(dataStore: DataStore, val recordName: String) extends Data(dataStore) {
 
   protected def field[FieldData <: Data](name: String, makeData: DataStore => FieldData): Field[FieldData] = {
@@ -71,8 +79,9 @@ abstract class RecordData(dataStore: DataStore, val recordName: String) extends 
 
 case class Field[FieldData <: Data](name: String, data: FieldData)
 
-case class CurrentCase[Choice <: Data](name: String, choice: Choice)
-
+/**
+  * A choice (alias union type).
+  */
 abstract class ChoiceData[Choice <: Data](dataStore: DataStore) extends Data(dataStore) {
 
   def cases: Seq[Case[Choice]]
@@ -112,6 +121,11 @@ abstract class ChoiceData[Choice <: Data](dataStore: DataStore) extends Data(dat
 
 case class Case[Choice <: Data](name: String, makeChoice: DataStore => Choice)
 
+case class CurrentCase[Choice <: Data](name: String, choice: Choice)
+
+/**
+  * A cross-reference.
+  */
 abstract class ReferenceData[Referred <: Data](dataStore: DataStore)(makeData: DataStore => Referred) extends Data(dataStore) {
 
   def scope: Observable[List[Referred]]
@@ -130,13 +144,19 @@ abstract class ReferenceData[Referred <: Data](dataStore: DataStore)(makeData: D
 
 }
 
+/**
+  * A list.
+  */
 class ListData[Element <: Data](dataStore: DataStore)(makeData: DataStore => Element) extends Data(dataStore) {
 
   def changed: Observable[List[Element]] = dataStore.observeChildren.map(_.map(child => makeData(child)))
 
-  def add(setNewElement: Element => Action): Action = () => {
-    val child = dataStore.createChild
-    setNewElement(makeData(child)).apply()
+  def add(setNewElement: Element => Action): Action = {
+    Task {
+      dataStore.createChild
+    }.flatMap(child =>
+      setNewElement(makeData(child))
+    )
   }
 
 }

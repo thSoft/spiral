@@ -3,6 +3,7 @@ package hu.thsoft.spiral.data
 import java.util.UUID
 
 import hu.thsoft.spiral.Id
+import monix.eval.Task
 import monix.execution.cancelables.BooleanCancelable
 import monix.reactive.Observable
 import monix.reactive.observables.ConnectableObservable
@@ -11,6 +12,7 @@ import monix.reactive.subjects.PublishSubject
 import org.scalajs.dom
 import org.scalajs.dom.StorageEvent
 import upickle.Js
+import monix.execution.Scheduler.Implicits.global
 
 /**
   * Persistent but not shared (LocalStorage-based) implementation of DataStore.
@@ -76,7 +78,7 @@ class LocalDataStore(id: Id) extends DataStore {
     dom.window.dispatchEvent(event)
   }
 
-  override def setAtomic[T](writeString: T => String)(value: T) = () => {
+  override def setAtomic[T](writeString: T => String)(value: T) = Task {
     val valueString = value.toString()
     dom.window.localStorage.setItem(id.toString(), valueString)
     raiseStorageEvent(valueString)
@@ -98,14 +100,14 @@ class LocalDataStore(id: Id) extends DataStore {
 
   val separator = "\n"
 
-  override def delete = () => {
+  override def delete = Task {
     dom.window.localStorage.removeItem(id.toString())
     raiseStorageEvent("")
   }
 
   override def createChild = {
     val childKey = id.child(UUID.randomUUID().toString())
-    setString(dom.window.localStorage.getItem(id.toString()) + separator + childKey.toString()).apply()
+    setString(dom.window.localStorage.getItem(id.toString()) + separator + childKey.toString()).runAsync
     new LocalDataStore(childKey)
   }
 

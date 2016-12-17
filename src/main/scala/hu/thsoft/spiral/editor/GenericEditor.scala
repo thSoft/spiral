@@ -7,6 +7,10 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 
 object GenericEditor {
 
+  /**
+    * Returns a generic editor for the given Data.
+    * Using this editor is not very convenient, but you just define a data model and you get an editor for free.
+    */
   def apply(data: Data, id: Id): Component = {
     data match {
       case data: BooleanData => new BooleanEditor(data, id)

@@ -1,6 +1,7 @@
 package hu.thsoft.spiral.data
 
 import hu.thsoft.firebase.{Firebase, FirebaseDataSnapshot}
+import monix.eval.Task
 import monix.execution.cancelables.BooleanCancelable
 import monix.reactive.Observable
 import monix.reactive.observables.ConnectableObservable
@@ -89,11 +90,11 @@ class FirebaseDataStore(firebase: Firebase) extends DataStore {
     })
   }
 
-  override def setAtomic[T](writeJson: (T) => Value)(value: T) = () => {
+  override def setAtomic[T](writeJson: (T) => Value)(value: T) = Task {
     firebase.set(upickle.json.writeJs(writeJson(value)).asInstanceOf[js.Any])
   }
 
-  override def delete = () => {
+  override def delete = Task {
     firebase.remove()
   }
 
