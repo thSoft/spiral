@@ -4,6 +4,7 @@ import java.util.UUID
 
 import hu.thsoft.spiral.Id
 import monix.eval.Task
+import monix.execution.Scheduler.Implicits.global
 import monix.execution.cancelables.BooleanCancelable
 import monix.reactive.Observable
 import monix.reactive.observables.ConnectableObservable
@@ -12,7 +13,6 @@ import monix.reactive.subjects.PublishSubject
 import org.scalajs.dom
 import org.scalajs.dom.StorageEvent
 import upickle.Js
-import monix.execution.Scheduler.Implicits.global
 
 /**
   * Persistent but not shared (LocalStorage-based) implementation of DataStore.

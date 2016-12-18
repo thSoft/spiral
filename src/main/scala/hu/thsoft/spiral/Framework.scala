@@ -1,6 +1,5 @@
 package hu.thsoft.spiral
 
-import hu.thsoft.spiral.Component.Action
 import japgolly.scalajs.react.{ReactDOM, ReactElement}
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
@@ -28,14 +27,11 @@ trait Component {
   def viewChanged: Observable[ReactElement] = state.switchMap(output(_).view)
 
   /** Returns the reactions of the component. */
-  def reacted: Observable[Action] = state.switchMap(output(_).reaction)
+  def reacted: Observable[Task[_]] = state.switchMap(output(_).reaction)
 
 }
 
 object Component {
-
-  /** A side effect. */
-  type Action = Task[Unit]
 
   /** Runs the given Component. It will be displayed in the given Node and its reactions will be performed.
     * Typically, you should call this only once in your JSApp's main method.
@@ -47,22 +43,10 @@ object Component {
 
 }
 
-object Action {
-
-  /** An Action that does nothing. */
-  val nop: Action = Task.now(())
-
-  /** Returns an Action that executes the given Actions sequentially. */
-  def sequential(actions: Seq[Action]): Action = {
-    Task.sequence(actions).map(_ => ())
-  }
-
-}
-
 /**
   * Defines how a Component looks like and reacts.
   */
-case class Output(view: Observable[ReactElement], reaction: Observable[Action])
+case class Output(view: Observable[ReactElement], reaction: Observable[Task[_]])
 
 object ObservableUtils {
 
@@ -89,6 +73,15 @@ object ObservableUtils {
    */
   def constant[T](item: T): Observable[T] = {
     Observable.never.startWith(Seq(item))
+  }
+
+}
+
+object TaskUtils {
+
+  /** Returns a Task that executes the given Tasks unordered, discarding their results. */
+  def gatherSideEffects[T](tasks: Seq[Task[T]]): Task[Unit] = {
+    Task.gatherUnordered(tasks).map(_ => ())
   }
 
 }

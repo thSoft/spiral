@@ -6,6 +6,7 @@ import hu.thsoft.spiral.data.Data.Stored
 import hu.thsoft.spiral.data.StringData
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
+import monix.eval.Task
 import monix.reactive.Observable
 import upickle.Js
 import upickle.json._
@@ -29,7 +30,7 @@ class CatGifs(data: StringData, id: Id) extends Component {
       val value = read(response.body)("data")("image_url")
       value match {
         case Js.Str(url) => data.set(url)
-        case _ => Action.nop
+        case _ => Task.unit
       }
     })
     Output(view, reaction)

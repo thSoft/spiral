@@ -1,7 +1,7 @@
 package hu.thsoft.spiral.data
 
-import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral.data.Data.Stored
+import monix.eval.Task
 import monix.reactive.Observable
 import upickle.Js
 
@@ -36,21 +36,21 @@ trait DataStore {
 
   def observeChildren: Observable[List[DataStore]]
 
-  def setAtomic[T](write: T => Serialized)(value: T): Action
+  def setAtomic[T](write: T => Serialized)(value: T): Task[Unit]
 
   def writeDouble: Double => Serialized
 
-  def setNumber(value: Double): Action = setAtomic(writeDouble)(value)
+  def setNumber(value: Double): Task[Unit] = setAtomic(writeDouble)(value)
 
   def writeString: String => Serialized
 
-  def setString(value: String): Action = setAtomic(writeString)(value)
+  def setString(value: String): Task[Unit] = setAtomic(writeString)(value)
 
   def writeBoolean: Boolean => Serialized
 
-  def setBoolean(value: Boolean): Action = setAtomic(writeBoolean)(value)
+  def setBoolean(value: Boolean): Task[Unit] = setAtomic(writeBoolean)(value)
 
-  def delete: Action
+  def delete: Task[Unit]
 
   def createChild: DataStore
 

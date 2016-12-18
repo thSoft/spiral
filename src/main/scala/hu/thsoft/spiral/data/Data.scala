@@ -1,6 +1,5 @@
 package hu.thsoft.spiral.data
 
-import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral.data.Data.Stored
 import monix.eval.Task
 import monix.reactive.Observable
@@ -11,7 +10,7 @@ import upickle.Js
   */
 sealed abstract class Data(val dataStore: DataStore) {
 
-  def delete: Action = dataStore.delete
+  def delete: Task[Unit] = dataStore.delete
 
   override def equals(obj: Any) = {
     obj match {
@@ -35,7 +34,7 @@ abstract class AtomicData[Value](dataStore: DataStore) extends Data(dataStore) {
 
   def changed: Observable[Stored[Value]]
 
-  def set(value: Value): Action
+  def set(value: Value): Task[Unit]
 
 }
 
@@ -138,7 +137,7 @@ abstract class ReferenceData[Referred <: Data](dataStore: DataStore)(makeData: D
     })
   }
 
-  def setReferred(referred: Referred): Action = {
+  def setReferred(referred: Referred): Task[Unit] = {
     dataStore.setString(referred.dataStore.url)
   }
 
@@ -151,7 +150,7 @@ class ListData[Element <: Data](dataStore: DataStore)(makeData: DataStore => Ele
 
   def changed: Observable[List[Element]] = dataStore.observeChildren.map(_.map(child => makeData(child)))
 
-  def add(setNewElement: Element => Action): Action = {
+  def add(setNewElement: Element => Task[Unit]): Task[Unit] = {
     Task {
       dataStore.createChild
     }.flatMap(child =>

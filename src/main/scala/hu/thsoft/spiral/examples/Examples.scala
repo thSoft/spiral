@@ -1,12 +1,12 @@
 package hu.thsoft.spiral.examples
 
-import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data.Data.Stored
 import hu.thsoft.spiral.data.{LocalDataStore, StringData}
 import hu.thsoft.spiral.editor.GenericEditor
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
+import monix.eval.Task
 import monix.reactive.Observable
 import org.scalajs.dom._
 
@@ -48,7 +48,7 @@ class ExampleSelector(data: StringData, id: Id) extends Component {
         )
       }))
     val exampleChanged = exampleList.changed.map(_.fold(data.delete)(example => data.set(example.name)))
-    val exampleReacted = selectedExample.fold(Observable.empty[Action])(_.component.reacted)
+    val exampleReacted = selectedExample.fold(Observable.empty[Task[_]])(_.component.reacted)
     val reaction =
       Observable.merge(
         exampleChanged,

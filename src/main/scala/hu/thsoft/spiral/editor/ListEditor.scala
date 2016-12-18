@@ -1,10 +1,10 @@
 package hu.thsoft.spiral.editor
 
-import hu.thsoft.spiral.Component.Action
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data._
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
+import monix.eval.Task
 import monix.reactive.Observable
 
 class ListEditor[Element <: Data](data: ListData[Element], id: Id) extends Component {
@@ -36,20 +36,20 @@ class ListEditor[Element <: Data](data: ListData[Element], id: Id) extends Compo
     Output(view, reaction)
   }
 
-  def setDefaultValue(elementData: Data): Action = {
+  def setDefaultValue(elementData: Data): Task[Unit] = {
     elementData match {
       case elementData: BooleanData => elementData.set(false)
       case elementData: NumberData => elementData.set(0)
       case elementData: StringData => elementData.set("")
-      case elementData: RecordData => Action.sequential(elementData.fields.map(field => setDefaultValue(field.data)))
+      case elementData: RecordData => TaskUtils.gatherSideEffects(elementData.fields.map(field => setDefaultValue(field.data)))
       case elementData: ChoiceData[_] => {
         val firstCase = elementData.cases.head
         val setCase = elementData.setCase(firstCase.name)
         val setValue = setDefaultValue(elementData.getValueData(firstCase))
-        Action.sequential(Seq(setCase, setValue))
+        setCase.flatMap(_ => setValue)
       }
-      case _: ListData[_] => Action.nop
-      case _: ReferenceData[_] => Action.nop
+      case _: ListData[_] => Task.unit
+      case _: ReferenceData[_] => Task.unit
     }
   }
 
