@@ -1,13 +1,13 @@
 package hu.thsoft.spiral.examples
 
-import hu.thsoft.firebase.Firebase
+import firebase.Firebase
 import hu.thsoft.spiral.data._
 import japgolly.scalajs.react.ReactElement
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object ColorEditor {
 
-  val data = new ColorData(new FirebaseDataStore(new Firebase("https://thsoft.firebaseio.com/spiral/examples/color")))
+  val data = new ColorData(Database.dataStore("spiral/examples/color"))
 
   def viewColor(red: Double, green: Double, blue: Double): ReactElement = {
     <.div(^.backgroundColor := s"rgb(${red.toInt}, ${green.toInt}, ${blue.toInt})", "\u00a0")

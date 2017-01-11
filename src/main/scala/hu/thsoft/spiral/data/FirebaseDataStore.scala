@@ -1,6 +1,6 @@
 package hu.thsoft.spiral.data
 
-import hu.thsoft.firebase.{Firebase, FirebaseDataSnapshot}
+import firebase.database.{DataSnapshot, Database, Reference}
 import monix.eval.Task
 import monix.execution.cancelables.BooleanCancelable
 import monix.reactive.Observable
@@ -13,26 +13,27 @@ import upickle.default.{readJs, writeJs}
 
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.js
+import scala.scalajs.js.|
 
 case class Cancellation(cancellation: js.Any) extends Throwable
 
 /**
   * Persistent and shared (Firebase-based) implementation of DataStore.
   */
-class FirebaseDataStore(firebase: Firebase) extends DataStore {
+class FirebaseDataStore(database: Database, firebase: Reference) extends DataStore {
 
   override type Serialized = Js.Value
 
   override def url = firebase.toString()
 
-  private def observeRaw: Observable[FirebaseDataSnapshot] =
-    new ConnectableObservable[FirebaseDataSnapshot] {
+  private def observeRaw: Observable[DataSnapshot] =
+    new ConnectableObservable[DataSnapshot] {
 
-      private val channel = PublishSubject[FirebaseDataSnapshot]
+      private val channel = PublishSubject[DataSnapshot]
 
       private lazy val subscription = {
         val callback =
-          (snapshot: FirebaseDataSnapshot, previousKey: js.UndefOr[String]) => {
+          (snapshot: DataSnapshot, previousKey: String | Null) => {
             channel.onNext(snapshot)
             ()
           }
@@ -54,7 +55,7 @@ class FirebaseDataStore(firebase: Firebase) extends DataStore {
 
       override def connect() = subscription
 
-      override def unsafeSubscribeFn(subscriber: Subscriber[FirebaseDataSnapshot]) = {
+      override def unsafeSubscribeFn(subscriber: Subscriber[DataSnapshot]) = {
         channel.unsafeSubscribeFn(subscriber)
       }
 
@@ -75,15 +76,15 @@ class FirebaseDataStore(firebase: Firebase) extends DataStore {
       }
     })
 
-  override def fromString(url: String) = new FirebaseDataStore(new Firebase(url))
+  override def fromString(url: String) = new FirebaseDataStore(database, database.refFromURL(url))
 
-  override def child(name: String) = new FirebaseDataStore(firebase.child(name))
+  override def child(name: String) = new FirebaseDataStore(database, firebase.child(name))
 
   override def observeChildren = {
     observeRaw.map(snapshot => {
       val children = ListBuffer[FirebaseDataStore]()
-      snapshot.forEach((child: FirebaseDataSnapshot) => {
-        children += new FirebaseDataStore(child.ref())
+      snapshot.forEach((child: DataSnapshot) => {
+        children += new FirebaseDataStore(database, child.ref)
         false
       })
       children.toList
@@ -99,7 +100,7 @@ class FirebaseDataStore(firebase: Firebase) extends DataStore {
   }
 
   override def createChild = {
-    new FirebaseDataStore(firebase.push(null))
+    new FirebaseDataStore(database, firebase.push(null))
   }
 
   override def readDouble = readJs[Double]

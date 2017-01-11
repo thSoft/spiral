@@ -1,5 +1,6 @@
 package hu.thsoft.spiral.examples
 
+import firebase.{Firebase, FirebaseConfig}
 import hu.thsoft.spiral._
 import hu.thsoft.spiral.data.Data.Stored
 import hu.thsoft.spiral.data.{LocalDataStore, StringData}
@@ -62,6 +63,7 @@ class ExampleSelector(data: StringData, id: Id) extends Component {
 object ExamplesApp extends JSApp {
 
   def main() {
+    Firebase.initializeApp(options)
     runComponent(new ExampleSelector(new StringData(new LocalDataStore(Id.fromString("example"))), Id.root))
   }
 
@@ -70,5 +72,13 @@ object ExamplesApp extends JSApp {
     document.body.appendChild(container)
     Component.run(component, container)
   }
+
+  lazy val options = new FirebaseConfig(
+    apiKey = "AIzaSyDuieXoulUbRkx9M-C-OpJhGmKGzgYTGP4",
+    authDomain = "thsoft-19e06.firebaseapp.com",
+    databaseURL = "https://thsoft-19e06.firebaseio.com",
+    storageBucket = "thsoft-19e06.appspot.com",
+    messagingSenderId = "19322249"
+  )
 
 }

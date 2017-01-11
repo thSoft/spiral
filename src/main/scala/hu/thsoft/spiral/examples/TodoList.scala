@@ -1,11 +1,11 @@
 package hu.thsoft.spiral.examples
 
-import hu.thsoft.firebase.Firebase
 import hu.thsoft.spiral.data._
 
 object TodoList {
 
-  val data = new ListData(new FirebaseDataStore(new Firebase("https://thsoft.firebaseio.com/spiral/examples/todoList")))(new TodoData(_))
+
+  val data = new ListData(Database.dataStore("spiral/examples/todoList"))(new TodoData(_))
 
 }
 
