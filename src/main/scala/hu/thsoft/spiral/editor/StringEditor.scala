@@ -12,19 +12,11 @@ class StringEditor(data: StringData, id: Id) extends Component {
   def state = data.changed
 
   def output(state: State) = {
-    state.fold(
-      invalid =>
-        Output(
-          view = Observable.pure(GenericEditor.viewInvalid(invalid)),
-          reaction = Observable.empty
-        ),
-      value => {
-        val input = new TextInput(id, value)()
-        Output(
-          view = Observable.pure(input.view),
-          reaction = input.changed.map(data.set(_))
-        )
-      }
+    val value = state.right.getOrElse("")
+    val input = new TextInput(id, value)()
+    Output(
+      view = Observable.pure(input.view),
+      reaction = input.changed.map(data.set(_))
     )
   }
 

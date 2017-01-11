@@ -12,19 +12,11 @@ class BooleanEditor(data: BooleanData, id: Id) extends Component {
   def state = data.changed
 
   def output(state: State) = {
-    state.fold(
-      invalid =>
-        Output(
-          view = Observable.pure(GenericEditor.viewInvalid(invalid)),
-          reaction = Observable.empty
-        ),
-      value => {
-        val checkbox = new Checkbox(id, value)()
-        Output(
-          view = Observable.pure(checkbox.view),
-          reaction = checkbox.changed.map(data.set(_))
-        )
-      }
+    val value = state.right.getOrElse(false)
+    val checkbox = new Checkbox(id, value)()
+    Output(
+      view = Observable.pure(checkbox.view),
+      reaction = checkbox.changed.map(data.set(_))
     )
   }
 

@@ -92,7 +92,7 @@ abstract class ChoiceData[Choice <: Data](dataStore: DataStore) extends Data(dat
       storedCaseName.right.flatMap(
         caseName => {
           cases.find(_.name == caseName).map(foundCase => {
-            CurrentCase(caseName, getValueData(foundCase))
+            makeCurrentCase(foundCase)
           }).toRight(
             Invalid(caseNameDataStore, Js.Str(caseName), cases.map(_.name).mkString(" or "), new Exception(s"unknown $caseName"))
           )
@@ -111,6 +111,10 @@ abstract class ChoiceData[Choice <: Data](dataStore: DataStore) extends Data(dat
 
   private def valueChild(dataStore: DataStore): DataStore = {
     dataStore.child("value")
+  }
+
+  def makeCurrentCase(foundCase: Case[Choice]): CurrentCase[Choice] = {
+    CurrentCase(foundCase.name, getValueData(foundCase))
   }
 
   def getValueData(selectedCase: Case[Choice]): Choice = {

@@ -14,35 +14,27 @@ class ChoiceEditor[Choice <: Data](data: ChoiceData[Choice], id: Id) extends Com
   def state = data.caseChanged
 
   def output(state: State) = {
-    state.fold(
-      invalid =>
-        Output(
-          view = Observable.pure(GenericEditor.viewInvalid(invalid)),
-          reaction = Observable.empty
-        ),
-      selectedCase => {
-        val valueEditor = GenericEditor(selectedCase.choice, id.child("value"))
-        val choices = data.cases.map(dataCase => Choice(dataCase.name, dataCase.name))
-        val cases = new ChoiceList(id.child("case"), choices, selectedCase.name)()
-        val view: Observable[ReactElement] =
-          valueEditor.viewChanged.map(valueView => {
-            <.div(
-              <.label(
-                "Case:",
-                cases.view
-              ),
-              valueView
-            )
-          })
-        val caseChanged = cases.changed.map(data.setCase(_))
-        val reaction =
-          Observable.merge(
-            caseChanged,
-            valueEditor.reacted
-          )
-        Output(view, reaction)
-      }
-    )
+    val currentCase = state.right.getOrElse(data.makeCurrentCase(data.cases.head))
+    val valueEditor = GenericEditor(currentCase.choice, id.child("value"))
+    val choices = data.cases.map(dataCase => Choice(dataCase.name, dataCase.name))
+    val cases = new ChoiceList(id.child("case"), choices, currentCase.name)()
+    val view: Observable[ReactElement] =
+      valueEditor.viewChanged.map(valueView => {
+        <.div(
+          <.label(
+            "Case:",
+            cases.view
+          ),
+          valueView
+        )
+      })
+    val caseChanged = cases.changed.map(data.setCase(_))
+    val reaction =
+      Observable.merge(
+        caseChanged,
+        valueEditor.reacted
+      )
+    Output(view, reaction)
   }
 
 }

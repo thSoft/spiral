@@ -23,11 +23,4 @@ object GenericEditor {
     }
   }
 
-  def viewInvalid(invalid: Invalid): ReactElement = {
-    <.a(
-      ^.href := invalid.dataStore.url,
-      s"Error, expected ${invalid.expectedTypeName}"
-    )
-  }
-
 }

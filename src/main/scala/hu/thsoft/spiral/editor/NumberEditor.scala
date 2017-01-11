@@ -13,19 +13,11 @@ class NumberEditor(data: NumberData, id: Id) extends Component {
   def state = data.changed
 
   def output(state: State) = {
-    state.fold(
-      invalid =>
-        Output(
-          view = Observable.pure(GenericEditor.viewInvalid(invalid)),
-          reaction = Observable.empty
-        ),
-      value => {
-        val input = new NumberInput(id, value)(^.min := data.min, ^.max := data.max)
-        Output(
-          view = Observable.pure(input.view),
-          reaction = input.changed.map(data.set(_))
-        )
-      }
+    val value: Double = state.right.getOrElse(0)
+    val input = new NumberInput(id, value)(^.min := data.min, ^.max := data.max)
+    Output(
+      view = Observable.pure(input.view),
+      reaction = input.changed.map(data.set(_))
     )
   }
 
